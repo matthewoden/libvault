@@ -1,7 +1,6 @@
 defmodule Vault do
   @moduledoc """
-  a client library that handles logging in, reading secrets, and writing secrets
-  with your local Vault instance.
+  The main module for configuring and interacting with HashiCorp's Vault.
 
   When possible, it tries to emulate the CLI, with `read`, `write`, `list` and 
   `delete` methods. An additional `request` method is provided when you need
@@ -20,35 +19,43 @@ defmodule Vault do
   - `Tesla` with `Vault.Http.Tesla`
     - Can be configured to use `:hackney`, `:ibrowse`, or `:httpc`
 
-
   ### Auth Adapters
 
-  Currently provides adapters for the following auth backends:
+  Adapters have been provided for the following auth backends:
   - [AppRole](https://www.vaultproject.io/api/auth/approle/index.html) with `Vault.Auth.Approle`
   - [GitHub](https://www.vaultproject.io/api/auth/github/index.html) with `Vault.Auth.Github`
+  - [GoogleCloud](https://www.vaultproject.io/api/auth/gcp/index.html)
+  - [JWT](https://www.vaultproject.io/api/auth/gcp/index.html)
   - [LDAP](https://www.vaultproject.io/api/auth/ldap/index.html) with `Vault.Auth.LDAP`
   - [UserPass](https://www.vaultproject.io/api/auth/userpass/index.html) with `Vault.Auth.UserPass`
   - [Token](https://www.vaultproject.io/api/auth/token/index.html#lookup-a-token-self-) with `Vault.Auth.Token`
 
+  In addition to the above, a generic backend is also provided (`Vault.Auth.Generic`). 
+  If support for auth provider is missing, you can still get up and running 
+  quickly, without writing a new adapter.
+
 
   ### Secret Engines
 
-  Currently provides adapters for the following secret engines:
+  Most of Vault's Secret Engines follow the same API. The `Vault.Engine.Generic`
+  adapter should handle most use cases for secret fetching.
+  
+  Vault's KV version 2  broke away from the standard REST convention. So KV has been given
+  its own adapter:
   - [Key/Value](https://www.vaultproject.io/api/secret/kv/index.html)
     - [v1](https://www.vaultproject.io/api/secret/kv/kv-v1.html) with `Vault.Engine.KVV1`
     - [v2](https://www.vaultproject.io/api/secret/kv/kv-v2.html) with `Vault.Engine.KVV1`
 
-  Most of vault's secret engines follow the same API conventions. An additional `Vault.Engine.Generic` adapter 
-  is also available, and can easily handle Cubbyhole, SSH, identity backends and more.
 
+  ### Request Flexibility
 
-  ### Additional Flexibility
-
-  Additionally, this library provides a `Vault.request` method, which allows you to
-  tap into additional methods or custom plugins, while still benefiting from token
-  control, JSON parsing, and other HTTP client nicities.
+  The core library only handles the basics around secret fetching. If you need to
+  access additional API endpoints, this library also provides a `Vault.request` 
+  method. This should allow you to tap into the full vault REST API, while still
+  benefiting from token control, JSON parsing, and other HTTP client nicities.
 
   ## Usage
+
   Example usage:
 
   ```

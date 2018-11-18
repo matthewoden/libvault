@@ -3,14 +3,15 @@ defmodule Vault.MixProject do
 
   def project do
     [
-      app: :vault,
+      app: :libvault,
       version: "0.1.0",
       elixir: "~> 1.5",
+      elixirc_paths: elixirc_paths(Mix.env()),
+      description: description(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      elixirc_paths: elixirc_paths(Mix.env()),
       docs: docs(),
-      name: "Vault"
+      package: package(),
     ]
   end
 
@@ -47,7 +48,25 @@ defmodule Vault.MixProject do
 
   defp docs do
     [
-      main: "Vault"
+      formatter_opts: [gfm: true],
+      extras: ["README.md"]
+    ]
+  end
+
+  defp description do
+    "
+    Highly configurable library for HashiCorp's Vault - handles authentication 
+    for multiple backends, and reading, writing, listing, and deleting secrets 
+    for a variety of engines.
+    "
+  end
+
+  defp package do
+    [
+      files: ["lib", "mix.exs", "README.md", "LICENSE.md"],
+      maintainers: ["Matthew Oden Potter"],
+      licenses: ["MIT"],
+      links: %{GitHub: "https://github.com/matthewoden/libvault"}
     ]
   end
 end

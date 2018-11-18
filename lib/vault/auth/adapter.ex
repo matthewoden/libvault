@@ -46,17 +46,20 @@ defmodule Vault.Auth.Adapter do
       end
     end
 
+    def login(%Vault{http: http, host: host}, _params), 
+      do: {:error, ["Missing params! Username and password are required."]}
   end
+
+
   ```
   """
 
   @type client :: Vault.t()
-  @type token :: String.t()
-
-  @type ttl :: integer
-
-  @type errors :: list()
   @type params :: map()
+
+  @type token :: String.t()
+  @type ttl :: integer
+  @type errors :: list()
 
   @type response :: {:ok, token, ttl} | {:error, errors}
 
