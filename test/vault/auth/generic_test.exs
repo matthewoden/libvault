@@ -7,25 +7,25 @@ defmodule Vault.Auth.GenericTest do
   end
 
   @credentials %{
-    path: "userpass/login/tester",
-    body: %{
-      password: "foo"
+    request: %{
+      path: "userpass/login/tester",
+      body: %{password: "foo"}
     },
-    token: ["auth", "client_token"],
-    ttl: ["auth", "lease_duration"]
+    response: %{
+      token: ["auth", "client_token"],
+      ttl: ["auth", "lease_duration"]
+    }
   }
 
   test "Generic login with valid credentials", %{bypass: bypass} do
     Bypass.expect_once(bypass, "POST", "/v1/auth/userpass/login/tester", fn conn ->
       {:ok, body, conn} = Plug.Conn.read_body(conn)
       assert Jason.decode!(body) == %{"password" => "foo"}
+      response = Jason.encode!(%{auth: %{client_token: "token", lease_duration: 2000}})
 
       conn
       |> Plug.Conn.put_resp_content_type("application/json")
-      |> Plug.Conn.resp(
-        200,
-        Jason.encode!(%{auth: %{client_token: "token", lease_duration: 2000}})
-      )
+      |> Plug.Conn.resp(200, response)
     end)
 
     {:ok, client} =
@@ -45,7 +45,7 @@ defmodule Vault.Auth.GenericTest do
     Bypass.expect_once(bypass, "POST", "/v1/auth/userpass/login/tester", fn conn ->
       conn
       |> Plug.Conn.put_resp_content_type("application/json")
-      |> Plug.Conn.resp(401, Jason.encode!(%{ errors: ["Invalid Credentials"]}))
+      |> Plug.Conn.resp(401, Jason.encode!(%{errors: ["Invalid Credentials"]}))
     end)
 
     {:error, reason} =
@@ -85,18 +85,20 @@ defmodule Vault.Auth.GenericTest do
         http: Vault.Http.Test
       )
       |> Vault.login(%{
-        path: "userpass/login/tester",
-        body: %{
-          password: "error"
+        request: %{
+          path: "userpass/login/tester",
+          body: %{password: "error"}
         },
-        token: ["auth", "client_token"],
-        ttl: ["auth", "lease_duration"]
+        response: %{
+          token: ["auth", "client_token"],
+          ttl: ["auth", "lease_duration"]
+        }
       })
 
     assert reason =~ "Http adapter error"
   end
 
-  test "Generic against dev server" do
+  test "Generic login for userpass, against dev server" do
     {:ok, client} =
       Vault.new(
         host: "http://localhost:8200",
@@ -104,12 +106,32 @@ defmodule Vault.Auth.GenericTest do
         http: Vault.Http.Tesla
       )
       |> Vault.login(%{
-        path: "userpass/login/tester",
-        body: %{
-          password: "foo"
+        request: %{
+          path: "userpass/login/tester",
+          body: %{password: "foo"}
         },
-        token: ["auth", "client_token"],
-        ttl: ["auth", "lease_duration"]
+        response: %{
+          token: ["auth", "client_token"],
+          ttl: ["auth", "lease_duration"]
+        }
+      })
+
+    assert client.token != nil
+    assert Vault.token_expired?(client) == false
+  end
+
+  test "Generic login for userpass, with defaults dev server" do
+    {:ok, client} =
+      Vault.new(
+        host: "http://localhost:8200",
+        auth: Vault.Auth.Generic,
+        http: Vault.Http.Tesla
+      )
+      |> Vault.login(%{
+        request: %{
+          path: "userpass/login/tester",
+          body: %{password: "foo"}
+        }
       })
 
     assert client.token != nil
