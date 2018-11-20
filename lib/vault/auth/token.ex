@@ -10,7 +10,8 @@ defmodule Vault.Auth.Token do
   @behaviour Vault.Auth.Adapter
 
   @doc """
-  Log in with an existing vault token.
+  Log in with an existing vault token. Auth path not required.
+
   ## Examples
 
   ```
@@ -18,6 +19,8 @@ defmodule Vault.Auth.Token do
   ```
   """
   @impl true
+  def login(vault, params)
+
   def login(%Vault{http: http, host: host}, %{token: token}) do
     payload = %{}
 

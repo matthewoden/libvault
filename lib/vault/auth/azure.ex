@@ -1,26 +1,26 @@
-defmodule Vault.Auth.GoogleCloud do
+defmodule Vault.Auth.Azure do
   @moduledoc """
-  Google Cloud Auth Adapter. 
+  Azure Auth Adapter. 
 
-  [Vault Docs](https://www.vaultproject.io/api/auth/gcp/index.html)
+  [Vault Docs](https://www.vaultproject.io/api/auth/azure/index.html)
   """
 
   @behaviour Vault.Auth.Adapter
 
   @doc """
-  Login with your Google Cloud role and JWT.  Defaults the auth path to `gcp`
+  Login with your Azure role and JWT.  Defaults the auth path to `azure`
 
   ## Examples
 
   ```
-  {:ok, token, ttl} = Vault.Auth.GoogleCloud.login(vault, %{role: "my-role", jwt: "my-jwt"})
+  {:ok, token, ttl} = Vault.Auth.Kubernetes.login(vault, %{role: "my-role", jwt: "my-jwt"})
   ```
   """
   @impl true
   def login(vault, params)
 
   def login(%Vault{auth_path: nil} = vault, params),
-    do: Vault.set_auth_path(vault, "gcp") |> login(params)
+    do: Vault.set_auth_path(vault, "azure") |> login(params)
 
   def login(%Vault{http: http, host: host, auth_path: path}, params) do
     with {:ok, params} <- validate_params(params),

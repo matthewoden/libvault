@@ -7,24 +7,23 @@ defmodule Vault.Auth.Github do
   @behaviour Vault.Auth.Adapter
 
   @doc """
-  Log in with a github access token.
+  Log in with a github access token.  Defaults the auth path to `github`
 
   ## Examples
+
   ```
   {:ok, token, ttl} = Vault.Auth.Github.login(vault, %{token: access_token})
   ```
   """
   @impl true
-  def login(%Vault{http: http, host: host} = vault, %{token: token}) do
-    body = %{token: token}
+  def login(vault, params)
 
-    headers = [
-      {"Content-Type", "application/json"}
-    ]
+  def login(%Vault{auth_path: nil} = vault, params),
+    do: Vault.set_auth_path(vault, "github") |> login(params)
 
-    url = host <> "/v1/auth/github/login"
-
-    with {:ok, %{body: body}} <- http.request(:post, url, body, headers) do
+  def login(%Vault{http: http, host: host, auth_path: path}, params) do
+    with {:ok, params} <- validate_params(params),
+         {:ok, %{body: body}} <- http.request(:post, url(host, path), params, headers()) do
       case body do
         %{"errors" => messages} ->
           {:error, messages}
@@ -36,8 +35,27 @@ defmodule Vault.Auth.Github do
           {:error, ["Unexpected response from vault.", inspect(otherwise)]}
       end
     else
+      {:error, :invalid_credentials} ->
+        {:error, ["Missing credentials - access token is required.", params]}
+
       {:error, response} ->
         {:error, ["Http adapter error", inspect(response)]}
     end
+  end
+
+  defp validate_params(%{token: token} = params) when is_binary(token) do
+    {:ok, params}
+  end
+
+  defp validate_params(_params) do
+    {:error, :invalid_credentials}
+  end
+
+  defp url(host, path) do
+    host <> "/v1/auth/" <> path <> "/login"
+  end
+
+  defp headers() do
+    [{"Content-Type", "application/json"}]
   end
 end

@@ -108,6 +108,9 @@ defmodule Vault.Auth.Generic do
 
     with {:ok, %{body: body}} <- http.request(request.method, url, request.body, headers) do
       case body do
+        %{"errors" => []} ->
+          {:error, ["Key not found"]}
+
         %{"errors" => messages} ->
           {:error, messages}
 

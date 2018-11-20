@@ -59,7 +59,7 @@ defmodule Vault.Auth.Adapter do
 
   @type token :: String.t()
   @type ttl :: integer
-  @type errors :: list()
+  @type errors :: list(term)
 
   @type response :: {:ok, token, ttl} | {:error, errors}
 

@@ -9,12 +9,16 @@ defmodule Vault.Engine.Adapter do
   @type token :: String.t()
   @type options :: list()
 
-  @type secret :: term
+  @type data :: term
   @type errors :: list()
 
-  @type response :: {:ok, secret} | {:error, errors}
+  @type response :: {:ok, data} | {:error, errors}
 
   @callback read(client, path, options) :: response
 
   @callback write(client, path, value, options) :: response
+
+  @callback list(client, path, options) :: response
+
+  @callback delete(client, path, options) :: response
 end

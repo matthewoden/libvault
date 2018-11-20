@@ -83,7 +83,7 @@ defmodule Vault.Auth.TokenTest do
 
   @tag :dev_server
   test "Token login against local dev server" do
-    # root token has no ttl
+    # root token has no ttl, gotta log in as someone else first.
 
     client =
       Vault.new(

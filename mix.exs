@@ -11,7 +11,7 @@ defmodule Vault.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       docs: docs(),
-      package: package(),
+      package: package()
     ]
   end
 

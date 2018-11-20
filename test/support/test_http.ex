@@ -28,6 +28,42 @@ defmodule Vault.Http.Test do
     {:error, "Adapter Error"}
   end
 
+  def request(
+        :post,
+        "http://localhost/v1/auth/azure/login" <> _rest,
+        %{role: "error", jwt: "error"},
+        _
+      ) do
+    {:error, "Adapter Error"}
+  end
+
+  def request(
+        :post,
+        "http://localhost/v1/auth/gcp/login" <> _rest,
+        %{role: "error", jwt: "error"},
+        _
+      ) do
+    {:error, "Adapter Error"}
+  end
+
+  def request(
+        :post,
+        "http://localhost/v1/auth/jwt/login" <> _rest,
+        %{role: "error", jwt: "error"},
+        _
+      ) do
+    {:error, "Adapter Error"}
+  end
+
+  def request(
+        :post,
+        "http://localhost/v1/auth/kubernetes/login" <> _rest,
+        %{role: "error", jwt: "error"},
+        _
+      ) do
+    {:error, "Adapter Error"}
+  end
+
   def request(method, path, body, headers) do
     {:ok, %{"method" => method, "path" => path, "body" => body, "headers" => headers}}
   end

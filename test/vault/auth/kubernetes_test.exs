@@ -1,4 +1,4 @@
-defmodule Vault.Auth.UserPassTest do
+defmodule Vault.Auth.KubernetesTest do
   use ExUnit.Case, async: true
 
   setup do
@@ -6,13 +6,29 @@ defmodule Vault.Auth.UserPassTest do
     {:ok, bypass: bypass}
   end
 
-  @credentials %{username: "username", password: "p@55w0rd"}
-  @valid_response %{auth: %{client_token: "token", lease_duration: 2000}}
+  @credentials %{role: "valid-role", jwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"}
+  @valid_response %{
+    "auth" => %{
+      "client_token" => "valid_token",
+      "accessor" => "0e9e354a-520f-df04-6867-ee81cae3d42d",
+      "policies" => [
+        "default",
+        "dev",
+        "prod"
+      ],
+      "lease_duration" => 2_764_800,
+      "renewable" => true
+    }
+  }
 
-  test "Userpass login with valid credentials", %{bypass: bypass} do
-    Bypass.expect_once(bypass, "POST", "/v1/auth/userpass/login/username", fn conn ->
+  test "Kubernetes login with valid credentials", %{bypass: bypass} do
+    Bypass.expect_once(bypass, "POST", "/v1/auth/kubernetes/login", fn conn ->
       {:ok, body, conn} = Plug.Conn.read_body(conn)
-      assert Jason.decode!(body) == %{"password" => "p@55w0rd"}
+
+      assert Jason.decode!(body) == %{
+               "role" => "valid-role",
+               "jwt" => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+             }
 
       conn
       |> Plug.Conn.put_resp_content_type("application/json")
@@ -22,21 +38,24 @@ defmodule Vault.Auth.UserPassTest do
     {:ok, client} =
       Vault.new(
         host: "http://localhost:#{bypass.port}",
-        auth: Vault.Auth.UserPass,
+        auth: Vault.Auth.Kubernetes,
         http: Vault.Http.Tesla
       )
       |> Vault.login(@credentials)
 
     assert Vault.token_expired?(client) == false
-    assert client.token == "token"
+    assert client.token == "valid_token"
     assert client.credentials == @credentials
   end
 
-
-  test "Userpass login with custom mount path", %{bypass: bypass} do
-    Bypass.expect_once(bypass, "POST", "/v1/auth/loserpass/login/username", fn conn ->
+  test "Kubernetes login with custom mount path", %{bypass: bypass} do
+    Bypass.expect_once(bypass, "POST", "/v1/auth/k8s/login", fn conn ->
       {:ok, body, conn} = Plug.Conn.read_body(conn)
-      assert Jason.decode!(body) == %{"password" => "p@55w0rd"}
+
+      assert Jason.decode!(body) == %{
+               "role" => "valid-role",
+               "jwt" => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+             }
 
       conn
       |> Plug.Conn.put_resp_content_type("application/json")
@@ -46,19 +65,19 @@ defmodule Vault.Auth.UserPassTest do
     {:ok, client} =
       Vault.new(
         host: "http://localhost:#{bypass.port}",
-        auth: Vault.Auth.UserPass,
-        auth_path: "loserpass",
+        auth: Vault.Auth.Kubernetes,
+        auth_path: "k8s",
         http: Vault.Http.Tesla
       )
       |> Vault.login(@credentials)
 
     assert Vault.token_expired?(client) == false
-    assert client.token == "token"
+    assert client.token == "valid_token"
     assert client.credentials == @credentials
   end
 
-  test "Userpass login with invalid credentials", %{bypass: bypass} do
-    Bypass.expect_once(bypass, "POST", "/v1/auth/userpass/login/username", fn conn ->
+  test "Kubernetes login with invalid credentials", %{bypass: bypass} do
+    Bypass.expect_once(bypass, "POST", "/v1/auth/kubernetes/login", fn conn ->
       conn
       |> Plug.Conn.put_resp_content_type("application/json")
       |> Plug.Conn.resp(401, Jason.encode!(%{errors: ["Invalid Credentials"]}))
@@ -67,7 +86,7 @@ defmodule Vault.Auth.UserPassTest do
     {:error, reason} =
       Vault.new(
         host: "http://localhost:#{bypass.port}",
-        auth: Vault.Auth.UserPass,
+        auth: Vault.Auth.Kubernetes,
         http: Vault.Http.Tesla
       )
       |> Vault.login(@credentials)
@@ -75,8 +94,8 @@ defmodule Vault.Auth.UserPassTest do
     assert reason == ["Invalid Credentials"]
   end
 
-  test "Userpass login with non-spec response", %{bypass: bypass} do
-    Bypass.expect_once(bypass, "POST", "/v1/auth/userpass/login/username", fn conn ->
+  test "Kubernetes login with non-spec response", %{bypass: bypass} do
+    Bypass.expect_once(bypass, "POST", "/v1/auth/kubernetes/login", fn conn ->
       conn
       |> Plug.Conn.put_resp_content_type("application/json")
       |> Plug.Conn.resp(401, Jason.encode!(%{problems: ["misconfigured"]}))
@@ -85,7 +104,7 @@ defmodule Vault.Auth.UserPassTest do
     {:error, [reason | _]} =
       Vault.new(
         host: "http://localhost:#{bypass.port}",
-        auth: Vault.Auth.UserPass,
+        auth: Vault.Auth.Kubernetes,
         http: Vault.Http.Tesla
       )
       |> Vault.login(@credentials)
@@ -93,52 +112,39 @@ defmodule Vault.Auth.UserPassTest do
     assert reason =~ "Unexpected response from vault"
   end
 
-  test "Userpass login without username" do
+  test "Kubernetes login without a role" do
     {:error, [reason | _]} =
       Vault.new(
         host: "http://localhost",
-        auth: Vault.Auth.UserPass,
-        http: Vault.Http.Test
-      )
-      |> Vault.login(%{ password: "error"})
-
-    assert reason =~ "Missing credentials"
-  end
-
-  test "Userpass login without password" do
-    {:error, [reason | _]} =
-      Vault.new(
-        host: "http://localhost",
-        auth: Vault.Auth.UserPass,
-        http: Vault.Http.Test
-      )
-      |> Vault.login(%{ password: "error"})
-
-    assert reason =~ "Missing credentials"
-  end
-
-  test "Userpass login with http adapter error" do
-    {:error, [reason | _]} =
-      Vault.new(
-        host: "http://localhost",
-        auth: Vault.Auth.UserPass,
-        http: Vault.Http.Test
-      )
-      |> Vault.login(%{username: "error", password: "error"})
-
-    assert reason =~ "Http adapter error"
-  end
-
-  test "userpass against dev server" do
-    {:ok, client} =
-      Vault.new(
-        host: "http://localhost:8200",
-        auth: Vault.Auth.UserPass,
+        auth: Vault.Auth.Kubernetes,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(%{username: "tester", password: "foo"})
+      |> Vault.login(%{jwt: "present"})
 
-    assert client.token != nil
-    assert Vault.token_expired?(client) == false
+    assert reason =~ "Missing credentials"
+  end
+
+  test "Kubernetes login without a jwt" do
+    {:error, [reason | _]} =
+      Vault.new(
+        host: "http://localhost",
+        auth: Vault.Auth.Kubernetes,
+        http: Vault.Http.Tesla
+      )
+      |> Vault.login(%{role: "role"})
+
+    assert reason =~ "Missing credentials"
+  end
+
+  test "Kubernetes login with http adapter error" do
+    {:error, [reason | _]} =
+      Vault.new(
+        host: "http://localhost",
+        auth: Vault.Auth.Kubernetes,
+        http: Vault.Http.Test
+      )
+      |> Vault.login(%{role: "error", jwt: "error"})
+
+    assert reason =~ "Http adapter error"
   end
 end

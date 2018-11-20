@@ -23,9 +23,11 @@ defmodule Vault do
 
   Adapters have been provided for the following auth backends:
   - [AppRole](https://www.vaultproject.io/api/auth/approle/index.html) with `Vault.Auth.Approle`
+  - [Azure](https://www.vaultproject.io/api/auth/approle/index.html) with `Vault.Auth.Azure`
   - [GitHub](https://www.vaultproject.io/api/auth/github/index.html) with `Vault.Auth.Github`
-  - [GoogleCloud](https://www.vaultproject.io/api/auth/gcp/index.html)
-  - [JWT](https://www.vaultproject.io/api/auth/gcp/index.html)
+  - [GoogleCloud](https://www.vaultproject.io/api/auth/gcp/index.html) with with `Vault.Auth.GoogleCloud`
+  - [JWT](https://www.vaultproject.io/api/auth/jwt/index.html) with `Vault.Auth.JWT`
+  - [Kubernetes](https://www.vaultproject.io/api/auth/jwt/index.html) with `Vault.Auth.Kubernetes`
   - [LDAP](https://www.vaultproject.io/api/auth/ldap/index.html) with `Vault.Auth.LDAP`
   - [UserPass](https://www.vaultproject.io/api/auth/userpass/index.html) with `Vault.Auth.UserPass`
   - [Token](https://www.vaultproject.io/api/auth/token/index.html#lookup-a-token-self-) with `Vault.Auth.Token`
@@ -37,9 +39,9 @@ defmodule Vault do
 
   ### Secret Engines
 
-  Most of Vault's Secret Engines follow the same API. The `Vault.Engine.Generic`
+  Most of Vault's Secret Engines use a replacable API. The `Vault.Engine.Generic`
   adapter should handle most use cases for secret fetching.
-  
+
   Vault's KV version 2  broke away from the standard REST convention. So KV has been given
   its own adapter:
   - [Key/Value](https://www.vaultproject.io/api/secret/kv/index.html)
@@ -95,6 +97,7 @@ defmodule Vault do
   defstruct http: @http,
             host: nil,
             auth: nil,
+            auth_path: nil,
             engine: nil,
             token: nil,
             token_expires_at: nil,
@@ -103,6 +106,7 @@ defmodule Vault do
   @type options :: map() | Keyword.t()
   @type http :: Vault.Http.Adapter.t() | nil
   @type auth :: Vault.Auth.Adapter.t() | nil
+  @type auth_path :: String.t()
   @type engine :: Vault.Engine.Adapter.t() | nil
   @type host :: String.t()
 
@@ -117,6 +121,7 @@ defmodule Vault do
           http: http,
           host: host,
           auth: auth,
+          auth_path: auth_path,
           engine: engine,
           token: token,
           token_expires_at: token_expires_at,
@@ -164,6 +169,15 @@ defmodule Vault do
   end
 
   @doc """
+  Set the path used when logging in with your auth adapter. Should not contain a leading slash. If left 
+  unset, the auth adapter may provide a default. See your Auth adapter for details.
+  """
+  @spec set_auth_path(t, auth_path) :: t
+  def set_auth_path(%__MODULE__{} = client, auth_path) when is_binary(auth_path) do
+    %{client | auth_path: auth_path}
+  end
+
+  @doc """
   Sets the default login credentials for this client.
   """
   @spec set_credentials(t, map) :: t
@@ -198,7 +212,7 @@ defmodule Vault do
              credentials: new_creds
          }}
 
-      otherwise ->
+      {:error, _reason} = otherwise ->
         otherwise
     end
   end
@@ -242,7 +256,8 @@ defmodule Vault do
 
   @doc """
   Write a secret to the configured secret engine. Returns the response from vault, 
-  along with the value written. on the "version" key
+  along with the value written. See adapter details for additional options (such
+  as versioning)
   """
   @spec write(t, String.t(), term, list()) :: {:ok, map} | {:error, term}
   def write(client, path, value, options \\ [])
@@ -262,6 +277,24 @@ defmodule Vault do
         otherwise
     end
   end
+
+  @doc """
+  Delete a secret from the configured secret engine. Returns the response from 
+  vault.
+  """
+  @spec write(t, String.t(), term, list()) :: {:ok, map} | {:error, term}
+  def delete(client, path, options \\ [])
+
+  def delete(%__MODULE__{engine: _, http: nil}, _path, _options),
+    do: {:error, ["http client not set"]}
+
+  def delete(%__MODULE__{engine: nil, http: _}, _path, _options),
+    do: {:error, ["secret engine not set"]}
+
+  def delete(%__MODULE__{engine: engine} = client, path, options) do
+    engine.delete(client, String.trim_leading(path, "/"), options)
+  end
+
 
   @methods [:get, :put, :post, :patch, :head, :delete]
 
