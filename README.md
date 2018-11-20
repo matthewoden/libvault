@@ -27,20 +27,22 @@ The following http Adapters are provided:
 Adapters have been provided for the following auth backends:
 
 - [AppRole](https://www.vaultproject.io/api/auth/approle/index.html) with `Vault.Auth.Approle`
+- [Azure](https://www.vaultproject.io/api/auth/approle/index.html) with `Vault.Auth.Azure`
 - [GitHub](https://www.vaultproject.io/api/auth/github/index.html) with `Vault.Auth.Github`
-- [GoogleCloud](https://www.vaultproject.io/api/auth/gcp/index.html) with `Vault.Auth.GoogleCloud`
-- [JWT](https://www.vaultproject.io/api/auth/gcp/index.html) with `Vault.Auth.JWT`
+- [GoogleCloud](https://www.vaultproject.io/api/auth/gcp/index.html) with with `Vault.Auth.GoogleCloud`
+- [JWT](https://www.vaultproject.io/api/auth/jwt/index.html) with `Vault.Auth.JWT`
+- [Kubernetes](https://www.vaultproject.io/api/auth/jwt/index.html) with `Vault.Auth.Kubernetes`
 - [LDAP](https://www.vaultproject.io/api/auth/ldap/index.html) with `Vault.Auth.LDAP`
 - [UserPass](https://www.vaultproject.io/api/auth/userpass/index.html) with `Vault.Auth.UserPass`
 - [Token](https://www.vaultproject.io/api/auth/token/index.html#lookup-a-token-self-) with `Vault.Auth.Token`
 
 In addition to the above, a generic backend is also provided (`Vault.Auth.Generic`).
-If support for auth provider is missing, you can use this to get up and running
-quickly, without writing out a full adapter.
+If support for auth provider is missing, you can still get up and running
+quickly, without writing a new adapter.
 
 ### Secret Engines
 
-Most of Vault's Secret Engines follow the same API. The `Vault.Engine.Generic`
+Most of Vault's Secret Engines use a replacable API. The `Vault.Engine.Generic`
 adapter should handle most use cases for secret fetching.
 
 Vault's KV version 2 broke away from the standard REST convention. So KV has been given
@@ -64,7 +66,7 @@ Example usage:
 ```
 client =
   Vault.new([
-    engine: Vault.Engine.Generic,
+    engine: Vault.Engine.KVV2,
     auth: Vault.Auth.UserPass,
     credentials: %{username: "username", password: "password"}
   ])
