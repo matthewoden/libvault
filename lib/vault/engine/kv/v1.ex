@@ -17,54 +17,18 @@ defmodule Vault.Engine.KVV1 do
   Gets a value from vault.
   """
   @impl true
-  @spec read(client, path, options) :: {:ok, value} | {:error, errors}
-  def read(%{http: http, host: host, token: token}, path, []) do
-    headers = [{"X-Vault-Token", token}]
-    url = host <> "/v1/" <> path
-
-    with {:ok, %{body: body}} <- http.request(:get, url, %{}, headers) do
-      case body do
-        %{"data" => data} ->
-          {:ok, data}
-
-        %{"errors" => []} ->
-          {:error, ["Key not found"]}
-
-        %{"errors" => messages} ->
-          {:error, messages}
-
-        otherwise ->
-          {:error, ["Unknown response from vault", inspect(otherwise)]}
-      end
-    else
-      {:error, reason} ->
-        {:error, ["Http Adapter error", inspect(reason)]}
-    end
-  end
+  defdelegate read(client, path, options \\ []), to: Vault.Engine.Generic
 
   @doc """
   Puts a value in vault.
   """
   @impl true
-  @spec write(client, path, value, options) :: {:ok, map()} | {:error, errors}
-  def write(%{http: http, host: host, token: token}, path, value, []) do
-    headers = [{"X-Vault-Token", token}]
-    url = host <> "/v1/" <> path
+  defdelegate write(client, path, value, options \\ []), to: Vault.Engine.Generic
 
-    with {:ok, %{body: body} = request} <- http.request(:post, url, value, headers) do
-      case body do
-        "" ->
-          {:ok, %{}}
+  @impl true
+  defdelegate list(client, path, options \\ []), to: Vault.Engine.Generic
+  
+  @impl true
+  defdelegate delete(client, path, options \\ []), to: Vault.Engine.Generic
 
-        %{"errors" => messages} ->
-          {:error, messages}
-
-        _otherwise ->
-          {:error, ["Unknown response from vault", inspect(request)]}
-      end
-    else
-      {:error, reason} ->
-        {:error, ["Http Adapter error", inspect(reason)]}
-    end
-  end
 end

@@ -84,6 +84,21 @@ defmodule Vault.Engine.Generic do
     request(client, path, value, options)
   end
 
+
+  @impl true
+  @spec write(client, path, value, options) :: {:ok, map()} | {:error, errors}
+  def list(client, path, value, options \\ []) do
+    options = Keyword.merge([method: :post], options)
+    request(client, path, value, options)
+  end
+
+  @impl true
+  @spec delete(client, path, options) :: {:ok, map()} | {:error, errors}
+  def delete(client, path, options \\ []) do
+    options = Keyword.merge([method: :delete], options)
+    request(client, path, %{}, options)
+  end
+
   defp request(%{http: http, host: host, token: token}, path, value, options) do
     headers = if token, do: [{"X-Vault-Token", token}], else: []
     method = Keyword.get(options, :method, :post)
@@ -96,6 +111,9 @@ defmodule Vault.Engine.Generic do
       case body do
         "" ->
           {:ok, %{}}
+
+        %{"errors" => []} ->
+          {:error, ["Key not found"]}
 
         %{"errors" => messages} ->
           {:error, messages}
