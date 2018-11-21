@@ -14,6 +14,10 @@ defmodule Vault.Engine.GenericTest do
 
   setup do
     {_, 0} = System.cmd("vault", ["write", "cubbyhole/hello", "foo=bar"])
+    {_, 0} = System.cmd("vault", ["write", "cubbyhole/hello/world", "foo=bar"])
+    {_, 0} = System.cmd("vault", ["write", "cubbyhole/hello/world/deep", "foo=bar"])
+    {_, 0} = System.cmd("vault", ["write", "cubbyhole/hello/dlrow", "bar=foo"])
+    {_, 0} = System.cmd("vault", ["write", "cubbyhole/to/delete", "bar=foo"])
     :ok
   end
 
@@ -33,6 +37,17 @@ defmodule Vault.Engine.GenericTest do
   test "Generic Engine writes to the cubbyhole are denied when not authorized" do
     assert {:error, ["permission denied"]} ==
              Vault.write(client("bad_Creds"), "cubbyhole/world", %{"baz" => "biz"})
+  end
+
+  test "Generic Engine can list from the cubbyhole" do
+    assert {:ok, %{"keys" => ["dlrow", "world", "world/"]}} == Vault.list(client(), "cubbyhole/hello")
+  end
+
+  test "Generic Engine can delete from the cubbyhole" do
+    {:ok, %{"bar" => "foo"}} = Vault.read(client(), "cubbyhole/to/delete")
+    assert {:ok, %{}} == Vault.delete(client(), "cubbyhole/to/delete")
+    {:error, ["Key not found"]} = Vault.read(client(), "cubbyhole/to/delete")
+
   end
 
   test "Generic Engine can read/write to/from ssh" do

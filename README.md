@@ -8,21 +8,21 @@ When possible, it tries to emulate the CLI, with `read`, `write`, `list` and
 `delete` methods. An additional `request` method is provided when you need
 further flexibility.
 
-## Flexibility
+## Configuration / Adapters
 
 Hashicorp's Vault is highly configurable. Rather than cover every possible option,
 this library strives to be flexible and adaptable. Auth backends, Secret
 Engines, and Http clients are all replacable, and each behaviour asks for a
 minimal contract.
 
-### Http Adapters
+## Http Adapters
 
 The following http Adapters are provided:
 
 - `Tesla` with `Vault.Http.Tesla`
   - Can be configured to use `:hackney`, `:ibrowse`, or `:httpc`
 
-### Auth Adapters
+## Auth Adapters
 
 Adapters have been provided for the following auth backends:
 
@@ -40,7 +40,7 @@ In addition to the above, a generic backend is also provided (`Vault.Auth.Generi
 If support for auth provider is missing, you can still get up and running
 quickly, without writing a new adapter.
 
-### Secret Engines
+## Secret Engine Adapters
 
 Most of Vault's Secret Engines use a replacable API. The `Vault.Engine.Generic`
 adapter should handle most use cases for secret fetching.
@@ -91,10 +91,6 @@ You can configure the client up front, or change configuration dynamically.
 
   {:ok, db_pass} = Vault.write(client, "kv/path/to/password", %{ password: "db_pass" })
 ```
-
-Roadmap:
-
-- Add List, Delete for Secret Engines
 
 ## Testing Locally
 

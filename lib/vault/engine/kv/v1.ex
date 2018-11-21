@@ -25,9 +25,15 @@ defmodule Vault.Engine.KVV1 do
   @impl true
   defdelegate write(client, path, value, options \\ []), to: Vault.Engine.Generic
 
+  @doc """
+  Lists secrets at a path
+  """
   @impl true
   defdelegate list(client, path, options \\ []), to: Vault.Engine.Generic
 
+  @doc """
+  Deletes secrets at a path
+  """
   @impl true
   defdelegate delete(client, path, options \\ []), to: Vault.Engine.Generic
 end

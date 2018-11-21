@@ -7,6 +7,8 @@ if Code.ensure_loaded?(Tesla) do
       - `Tesla.Middleware.JSON`*
       - `Tesla.Middleware.FollowRedirects`
 
+    If you need to set
+
     *expects the `Jason` module for JSON decoding. Not configurable at this time.
 
     ## Setup

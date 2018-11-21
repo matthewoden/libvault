@@ -15,6 +15,9 @@ defmodule Vault.Engine.KVV2Test do
 
   setup do
     {_, 0} = System.cmd("vault", ["kv", "put", "secret/hello", "foo=bar"])
+    {_, 0} = System.cmd("vault", ["kv", "put", "secret/hello/world", "baz=biz"])
+    {_, 0} = System.cmd("vault", ["kv", "put", "secret/hello/world/foo", "bar=buz"])
+
     :ok
   end
 
@@ -36,8 +39,62 @@ defmodule Vault.Engine.KVV2Test do
     assert {:ok, %{"foo" => value}} == Vault.read(client(), "secret/write")
   end
 
+  test "kvv2 read a versioned secret" do
+    value_1 = String.codepoints("some long value") |> Enum.shuffle() |> Enum.join()
+    value_2 = String.codepoints("some long value") |> Enum.shuffle() |> Enum.join()
+
+    {:ok, %{"version" => version_1 }} = Vault.write(client(), "secret/write/version", %{"foo" => value_1})
+    {:ok, %{"version" => version_2 }} = Vault.write(client(), "secret/write/version", %{"foo" => value_2})
+
+    assert {:ok, %{"foo" => value_1}} == Vault.read(client(), "secret/write/version", version: version_1)
+    assert {:ok, %{"foo" => value_2}} == Vault.read(client(), "secret/write/version", version: version_2)
+  end
+
   test "kvv2 write returns an error if token is invalid" do
     assert {:error, ["permission denied"]} ==
              Vault.write(client("bad_creds"), "secret/write", %{"foo" => "baz"})
+  end
+
+  test "kvv2 list" do
+    assert {:ok, %{"keys" => ["world", "world/"]}} == Vault.list(client(), "secret/hello")
+  end
+
+  test "kvv2 delete version" do
+    {:ok, %{"version" => version}} =
+      Vault.write(client(), "secret/write/to/delete", %{"foo" => "bar"})
+
+    {:ok, %{}} = Vault.delete(client(), "secret/write/to/delete", versions: [version])
+
+    assert {:error, ["Key not found"]} ==
+             Vault.read(client(), "secret/write/to/delete", version: version)
+
+    {:ok, %{"data" => %{"metadata" => %{"version" => soft_deleted_version}}}} =
+      Vault.read(client(), "secret/write/to/delete", version: version, full_response: true)
+
+    assert soft_deleted_version == version
+  end
+
+  test "kvv2 delete version returns an error if a version isn't specified" do
+    {:error, ["A list of versions is required"]} = Vault.delete(client(), "secret/write/to/delete")
+  end
+
+  test "kvv2 destroy version" do
+    {:ok, %{"version" => version}} =
+      Vault.write(client(), "secret/write/to/destroy", %{"foo" => "bar"})
+
+    {:ok, %{}} =
+      Vault.delete(client(), "secret/write/to/destroy", versions: [version], destroy: true)
+
+    assert {:error, ["Key not found"]} ==
+             Vault.read(client(), "secret/write/to/destroy", version: version)
+
+    {:ok, %{"data" => %{"metadata" => %{"destroyed" => destroyed}}}} =
+      Vault.read(client(), "secret/write/to/destroy", version: version, full_response: true)
+
+    assert destroyed == true
+  end
+
+  test "kvv2 destroy version returns an error if a version isn't specified" do
+    {:error, ["A list of versions is required"]} = Vault.delete(client(), "secret/write/to/delete", destroy: true)
   end
 end

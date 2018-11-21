@@ -36,11 +36,10 @@ defmodule Vault do
   If support for auth provider is missing, you can still get up and running 
   quickly, without writing a new adapter.
 
-
   ### Secret Engines
 
   Most of Vault's Secret Engines use a replacable API. The `Vault.Engine.Generic`
-  adapter should handle most use cases for secret fetching.
+  adapter should handle most use cases for secret fetching. This is also the default value.
 
   Vault's KV version 2  broke away from the standard REST convention. So KV has been given
   its own adapter:
@@ -79,7 +78,6 @@ defmodule Vault do
     client = 
       Vault.new()
       |> Vault.set_auth(Vault.Auth.Approle)
-      |> Vault.set_engine(Vault.Engine.KVV1)
       |> Vault.login(%{role_id: "role_id", secret_id: "secret_id"})
 
     {:ok, db_pass} = Vault.read(client, "secret/path/to/password")
@@ -98,7 +96,7 @@ defmodule Vault do
             host: nil,
             auth: nil,
             auth_path: nil,
-            engine: nil,
+            engine: Vault.Engine.Generic,
             token: nil,
             token_expires_at: nil,
             credentials: %{}
@@ -129,19 +127,71 @@ defmodule Vault do
         }
 
   @doc """
-  Create a new client. Optionally provide a Keyword list, or map of options for the initial configuration.
+  Create a new client. Optionally provide a keyword list or map of options for the initial configuration.
+
+  ## Examples
+
+  Return a default Vault client:
+  ```
+  client = Vault.new()
+  ```
+
+  Return a fully initialized Vault Client:
+  ```
+    client = Vault.new(%{
+      http: http,
+      host: myvault.instance.com,
+      auth: Vault.Auth.JWT,
+      auth_path: 'jwt',
+      engine: Vault.Engine.Generic,
+      token: "abc123",
+      token_expires_at: NaiveDateTime.utc_now() |> NaiveDateTime.add(30, :seconds),
+      credentials: %{role_id: "dev-role", jwt: "averylongstringoflettersandnumbers..."}
+    })
+
+  ```
+
+  ### Options
+  The following options can be provided.
+
+  * `:auth` - Module for your Auth adapter.
+  * `:auth_path` - Path to use for your auth adapter. Provided adapters have their own default paths. Check your adapter for details.
+  * `:engine` Module for your Secret Engine adapter. Defaults to `Vault.Engine.Generic`.
+  * `:host` - host of your vault instance. Should contain the port, if needed. Should not contain a trailing slash. Defaults to `System.get_env("VAULT_ADDR")`.
+  * `:http` - Module for your http adapter. Defaults to `Vault.Http.Tesla` when `:tesla` is present.
+  * `:token` - A vault token.
+  * `:token_expires_at` A `NaiveDateTime` instance that represents when the token expires, in utc.
+  * `:credentials` - The credentials to use when authenticating with your Auth adapter.
+
   """
   @spec new(options) :: t
   def new(params \\ %{}) when is_list(params) or is_map(params) do
+    params = Map.merge(%{host: System.get_env("VAULT_ADDR")}, Map.new(params))
+
     struct(__MODULE__, params)
   end
 
   @doc """
-  Set the host of your vault instance.
+  Set the host of your vault instance. 
+
+  ## Examples
+
+  The host can be fetched from anywhere, as long as it's a string.
+  ```
+  vault = Vault.set_host(vault, System.get_env("VAULT_ADDR"))
+  ```
+
+  The port should be provided if needed, along with the protocol.
+  ```
+  vault =Vault.set_host(vault, "https://my-vault.host.com:12345")
+  ```
   """
   @spec set_host(t, host) :: t
   def set_host(%__MODULE__{} = client, host) when is_binary(host) do
-    %{client | host: host}
+    # TODO - move host formatting niceties to a shared location.
+    host = if String.starts_with?(host, "http"), do: host, else: "https://" <> host
+
+    %{client | host: String.trim_trailing(host, "/")}
   end
 
   @doc """
@@ -239,7 +289,8 @@ defmodule Vault do
   def token_expires_at(client), do: client.token_expires_at
 
   @doc """
-  Read a secret from the configured secret engine
+  Read a secret from the configured secret engine. See Secret Engine adapter options
+  for further configuration, such as fetching a versioned secret.
   """
   @spec read(t, String.t(), list()) :: {:ok, map} | {:error, term}
   def read(client, path, options \\ [])
@@ -256,8 +307,8 @@ defmodule Vault do
 
   @doc """
   Write a secret to the configured secret engine. Returns the response from vault, 
-  along with the value written. See adapter details for additional options (such
-  as versioning)
+  along with the value written. See Secret Engine adapter details for additional 
+  configuration (such as versioning)
   """
   @spec write(t, String.t(), term, list()) :: {:ok, map} | {:error, term}
   def write(client, path, value, options \\ [])
@@ -271,7 +322,7 @@ defmodule Vault do
   def write(%__MODULE__{engine: engine} = client, path, value, options) do
     case engine.write(client, String.trim_leading(path, "/"), value, options) do
       {:ok, data} ->
-        {:ok, Map.merge(data, %{"value" => value})}
+        {:ok, Map.merge(data || %{}, %{"value" => value})}
 
       otherwise ->
         otherwise
@@ -279,10 +330,28 @@ defmodule Vault do
   end
 
   @doc """
-  Delete a secret from the configured secret engine. Returns the response from 
-  vault.
+  List secret keys available at a certain path. See Engine adapter options
+  for further configuration.
   """
-  @spec write(t, String.t(), term, list()) :: {:ok, map} | {:error, term}
+  @spec list(t, String.t(), list()) :: {:ok, map} | {:error, term}
+  def list(client, path, options \\ [])
+
+  def list(%__MODULE__{engine: _, http: nil}, _path, _options),
+    do: {:error, ["http client not set"]}
+
+  def list(%__MODULE__{engine: nil, http: _}, _path, _options),
+    do: {:error, ["secret engine not set"]}
+
+  def list(%__MODULE__{engine: engine} = client, path, options) do
+    engine.list(client, String.trim_leading(path, "/"), options)
+  end
+
+  @doc """
+  Delete a secret from the configured secret engine. Returns the response from 
+  vault, typically an empty map. See Secret Engine adapter options
+  for further configuration.
+  """
+  @spec delete(t, String.t(), list()) :: {:ok, map} | {:error, term}
   def delete(client, path, options \\ [])
 
   def delete(%__MODULE__{engine: _, http: nil}, _path, _options),
@@ -295,32 +364,58 @@ defmodule Vault do
     engine.delete(client, String.trim_leading(path, "/"), options)
   end
 
-
   @methods [:get, :put, :post, :patch, :head, :delete]
 
   @doc """
   Make an HTTP request against your vault instance, with the current vault token. 
-  This library is incomplete, but this can help fill some of the gaps, while 
-  helping out with token management, and JSON parsing.
+  This library doesn't cover every vault API, but this can help fill some of the
+  gaps, and removing some boilerplate around token management, and JSON parsing.
 
-  options:
-  - query_params - a keyword list of query params for the request
-  - body - the body for the request
-  - headers - the headers for the request
-  - version - String. The vault api version - defaults to "v1"
+  It can also be handy for renewing dynamic secrets, if you're using the AWS 
+  Secret backend.
 
-  ### Example
-    client = Vault.new(
-      http: Vault.Http.Tesla, 
-      host: "http://localhost", 
-      token: "token"
-      token_expires_in: 32000
-    )
+  ## Examples
 
-    Vault.request(client, :post, "path/to/call", [ body: %{ "foo" => "bar"}])
-    # POST to http://localhost/v1/path/to/call
-    # with headers: {"X-Vault-Token", "token"}
-    # and a JSON payload of: "{ 'foo': 'bar'}"
+  Requests can take the following options a Keyword List.
+  
+  ### options:
+  - `:query_params` - a keyword list of query params for the request. Do **not** include query params on the path.
+  - `:body` - Map. The body for the request
+  - `:headers` - Keyword list. The headers for the request
+  - `:version` - String. The vault api version - defaults to "v1"
+
+  ### General Example
+  Here's a genneric example for making a request:
+
+  ```
+  client = Vault.new(
+    http: Vault.Http.Tesla, 
+    host: "http://localhost", 
+    token: "token"
+    token_expires_in: NaiveDateTime.utc_now()
+  )
+
+  Vault.request(client, :post, "path/to/call", [ body: %{ "foo" => "bar"}])
+  # POST to http://localhost/v1/path/to/call
+  # with headers: {"X-Vault-Token", "token"}
+  # and a JSON payload of: "{ 'foo': 'bar'}"
+  ```
+
+  ### AWS lease renewal
+  A quick example of renewing a lease.
+  ```
+  client = Vault.new(
+    http: Vault.Http.Tesla, 
+    host: "http://localhost", 
+    token: "token"
+    token_expires_in: NaiveDateTime.utc_now()
+  )
+
+  body = %{lease_id: lease, increment: increment}
+  {:ok, response} = Vault.request(client, request(:put, "sys/leases/renew", [body: body])
+  ```
+
+
   """
 
   @spec request(t, method, String.t(), list) :: {:ok, term} | {:error, list()}

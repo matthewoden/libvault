@@ -1,5 +1,5 @@
 defmodule VaultTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   test "new() creates a client from a map" do
     config = %{
@@ -15,7 +15,8 @@ defmodule VaultTest do
              auth: Vault.Auth.Token,
              credentials: %{token: "test"},
              token: nil,
-             token_expires_at: nil
+             token_expires_at: nil,
+             host: System.get_env("VAULT_ADDR")
            }
   end
 
@@ -33,7 +34,8 @@ defmodule VaultTest do
              auth: Vault.Auth.Token,
              credentials: %{token: "test"},
              token: nil,
-             token_expires_at: nil
+             token_expires_at: nil,
+             host: System.get_env("VAULT_ADDR")
            }
   end
 

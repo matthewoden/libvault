@@ -75,7 +75,8 @@ defmodule Vault.Engine.Generic do
   end
 
   @doc """
-  Puts a value in vault. Defaults to a POST request against the provided path.  See option details above for full configuration
+  Puts a value in vault. Defaults to a POST request against the provided path.  
+  See option details above for full configuration
   """
   @impl true
   @spec write(client, path, value, options) :: {:ok, map()} | {:error, errors}
@@ -84,11 +85,36 @@ defmodule Vault.Engine.Generic do
     request(client, path, value, options)
   end
 
+  @doc """
+  Lists secrets at a path. Defaults to a GET request against the provided path, 
+  with a query param of ?list=true.  
+
+  See `options` details above for full configuration.
+
+  ## Examples
+
+  ```
+  {:ok, %{ 
+      "keys"=> ["foo", "foo/"] 
+    } 
+  } = Vault.Engine.Generic.List(client, "path/to/list/", [full_response: true])
+  ```
+  With the full Response:
+
+  ```
+  {:ok, %{
+      "data" => %{
+        "keys"=> ["foo", "foo/"]
+      },
+    }
+  }  = Vault.Engine.Generic.List(client, "path/to/list/", [full_response: true])
+  ```
+  """
   @impl true
-  @spec write(client, path, value, options) :: {:ok, map()} | {:error, errors}
-  def list(client, path, value, options \\ []) do
-    options = Keyword.merge([method: :post], options)
-    request(client, path, value, options)
+  @spec list(client, path, options) :: {:ok, map()} | {:error, errors}
+  def list(client, path, options \\ []) do
+    options = Keyword.merge([method: :get, query_params: %{list: true}], options)
+    request(client, path, %{}, options)
   end
 
   @impl true
