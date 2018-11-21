@@ -3,7 +3,7 @@ defmodule Vault.Engine.Adapter do
   Adapter specificication for Secret Engines
   """
 
-  @type client :: Vault.Client.t()
+  @type vault :: Vault.t()
   @type path :: String.t()
   @type value :: term
   @type token :: String.t()
@@ -14,11 +14,11 @@ defmodule Vault.Engine.Adapter do
 
   @type response :: {:ok, data} | {:error, errors}
 
-  @callback read(client, path, options) :: response
+  @callback read(vault, path, options) :: response
 
-  @callback write(client, path, value, options) :: response
+  @callback write(vault, path, value, options) :: response
 
-  @callback list(client, path, options) :: response
+  @callback list(vault, path, options) :: response
 
-  @callback delete(client, path, options) :: response
+  @callback delete(vault, path, options) :: response
 end

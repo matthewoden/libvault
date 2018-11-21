@@ -1,6 +1,6 @@
 defmodule Vault.Auth.Token do
   @moduledoc """
-  Token Auth Adapter. Checks a token for validity, and saves if valid. Useful
+  Token Auth Adapter. Checks a provided token for validity, and saves if valid. Useful
   for local dev, or writing a CLI that uses the `.vault-token` file in the home 
   directory.
 
@@ -15,7 +15,7 @@ defmodule Vault.Auth.Token do
   ## Examples
 
   ```
-  {:ok, token, ttl} = Vault.Auth.Token.login(client, %{token: local_token})
+  {:ok, token, ttl} = Vault.Auth.Token.login(vault, %{token: local_token})
   ```
   """
   @impl true

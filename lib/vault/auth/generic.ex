@@ -22,13 +22,13 @@ defmodule Vault.Auth.Generic do
   @behaviour Vault.Auth.Adapter
 
   @doc """
-  Login with a custom auth method. Provide options for the request, and how 
+  Authenticate with a custom auth method. Provide options for the request, and how 
   to parse the response.
 
   ## Examples
 
   `request` defines parameters for the request to vault
-  - `path`- the path to login, after "auth" If you want to login at `https://myvault.com/v1/auth/jwt/login`, then the path would be `jwt/login`
+  - `path`- the path for authentication, after "auth" If you want to authenticate against `https://myvault.com/v1/auth/jwt/login`, then the path would be `jwt/login`
   - `method`- one of `:get`, `:post`, `:put`, `:patch`, `:delete`, defaults to `:post`
   - `body`- any params needed to login. Defaults to `%{}`
 
@@ -39,7 +39,7 @@ defmodule Vault.Auth.Generic do
 
   The following would provide a minimal adapter for the JWT backend:
   ```
-  {:ok, token, ttl} = Vault.Auth.Generic.login(client, %{ 
+  {:ok, token, ttl} = Vault.Auth.Generic.login(vault, %{ 
     request: %{
       path: "/jwt/login", 
       body: %{role: "my-role", jwt: "my-jwt" }, 
@@ -47,17 +47,17 @@ defmodule Vault.Auth.Generic do
   })
   ```
 
-  Here's the above example as part of the full client flow. Plugs right in,
-  except this time we return a logged in client.
+  Here's the above example as part of the full Vault client flow. On success,
+  it returns an authenticated vault client.
   ```
-  client = 
+  vault = 
     Vault.new([
       auth: Vault.Auth.Generic,
       http: Vault.Http.Tesla,
       engine: Vault.KVV2
     ])
 
-  {:ok, client} = Vault.auth(client, %{ 
+  {:ok, vault} = Vault.auth(vault, %{ 
     request: %{
       path: "/jwt/login", 
       body: %{role: "my-role", jwt: "my-jwt" }, 
@@ -68,14 +68,14 @@ defmodule Vault.Auth.Generic do
   Here's a more explicit example, with every option configured.
   ```
 
-  client = 
+  vault = 
     Vault.new([
       auth: Vault.Auth.Generic,
       http: Vault.Http.Tesla,
       engine: Vault.KVV2
     ])
 
-  {:ok, client} = Vault.Auth.Generic.login(client, %{ 
+  {:ok, vault} = Vault.auth(vault, %{ 
     request:
       path: "/jwt/login", 
       method: :post,

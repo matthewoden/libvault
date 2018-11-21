@@ -66,7 +66,7 @@ benefiting from token control, JSON parsing, and other HTTP client nicities.
 Example usage:
 
 ```
-client =
+vault =
   Vault.new([
     engine: Vault.Engine.KVV2,
     auth: Vault.Auth.UserPass,
@@ -74,24 +74,24 @@ client =
   ])
   |> Vault.auth()
 
-{:ok, db_pass} = Vault.read(client, "secret/path/to/password")
-{:ok, %{"version" => 1 }} = Vault.write(client, "secret/path/to/creds", %{secret: "secrets!"})
+{:ok, db_pass} = Vault.read(vault, "secret/path/to/password")
+{:ok, %{"version" => 1 }} = Vault.write(vault, "secret/path/to/creds", %{secret: "secrets!"})
 ```
 
-You can configure the client up front, or change configuration on the fly.
+You can configure the vault client up front, or change configuration on the fly.
 
 ```
-  client =
+  vault =
     Vault.new()
     |> Vault.set_auth(Vault.Auth.Approle)
     |> Vault.set_engine(Vault.Engine.Generic)
     |> Vault.auth(%{role_id: "role_id", secret_id: "secret_id"})
 
-  {:ok, db_pass} = Vault.read(client, "secret/path/to/password")
+  {:ok, db_pass} = Vault.read(vault, "secret/path/to/password")
 
-  client = Vault.set_engine(Vault.Engine.KVV2) // switch to versioned secrets
+  vault = Vault.set_engine(Vault.Engine.KVV2) // switch to versioned secrets
 
-  {:ok, db_pass} = Vault.write(client, "kv/path/to/password", %{ password: "db_pass" })
+  {:ok, db_pass} = Vault.write(vault, "kv/path/to/password", %{ password: "db_pass" })
 ```
 
 ## Testing Locally

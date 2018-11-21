@@ -85,18 +85,18 @@ defmodule Vault.Auth.TokenTest do
   test "Token login against local dev server" do
     # root token has no ttl, gotta log in as someone else first.
 
-    client =
+    vault =
       Vault.new(
         host: "http://localhost:8200",
         auth: Vault.Auth.UserPass,
         http: Vault.Http.Tesla
       )
 
-    {:ok, %{token: token}} = Vault.auth(client, %{username: "tester", password: "foo"})
+    {:ok, %{token: token}} = Vault.auth(vault, %{username: "tester", password: "foo"})
 
-    {:ok, client} = Vault.set_auth(client, Vault.Auth.Token) |> Vault.auth(%{token: token})
+    {:ok, vault} = Vault.set_auth(vault, Vault.Auth.Token) |> Vault.auth(%{token: token})
 
-    assert client.token != nil
-    assert Vault.token_expired?(client) == false
+    assert vault.token != nil
+    assert Vault.token_expired?(vault) == false
   end
 end

@@ -60,7 +60,7 @@ defmodule Vault do
   Example usage:
 
   ```
-  client = 
+  vault = 
     Vault.new([
       engine: Vault.Engine.KVV2,
       auth: Vault.Auth.UserPass, 
@@ -68,23 +68,23 @@ defmodule Vault do
     ]) 
     |> Vault.auth()
 
-  {:ok, db_pass} = Vault.read(client, "secret/path/to/password")
-  {:ok, aws_creds} = Vault.read(client, "secret/path/to/creds")
+  {:ok, db_pass} = Vault.read(vault, "secret/path/to/password")
+  {:ok, aws_creds} = Vault.read(vault, "secret/path/to/creds")
   ```
 
   You can configure the client up front, or change configuration dynamically.
 
   ```
-    client = 
+    vault = 
       Vault.new()
       |> Vault.set_auth(Vault.Auth.Approle)
       |> Vault.auth(%{role_id: "role_id", secret_id: "secret_id"})
 
-    {:ok, db_pass} = Vault.read(client, "secret/path/to/password")
+    {:ok, db_pass} = Vault.read(vault, "secret/path/to/password")
 
-    client = Vault.set_engine(Vault.Engine.KVV2) // switch to versioned secrets
+    vault = Vault.set_engine(Vault.Engine.KVV2) // switch to versioned secrets
 
-    {:ok, db_pass} = Vault.write(client, "kv/path/to/password", %{ password: "db_pass" })
+    {:ok, db_pass} = Vault.write(vault, "kv/path/to/password", %{ password: "db_pass" })
   ```
   """
 
@@ -133,12 +133,12 @@ defmodule Vault do
 
   Return a default Vault client:
   ```
-  client = Vault.new()
+  vault = Vault.new()
   ```
 
   Return a fully initialized Vault Client:
   ```
-    client = Vault.new(%{
+    vault = Vault.new(%{
       http: http,
       host: myvault.instance.com,
       auth: Vault.Auth.JWT,
@@ -187,35 +187,35 @@ defmodule Vault do
   ```
   """
   @spec set_host(t, host) :: t
-  def set_host(%__MODULE__{} = client, host) when is_binary(host) do
+  def set_host(%__MODULE__{} = vault, host) when is_binary(host) do
     # TODO - move host formatting niceties to a shared location.
     host = if String.starts_with?(host, "http"), do: host, else: "https://" <> host
 
-    %{client | host: String.trim_trailing(host, "/")}
+    %{vault | host: String.trim_trailing(host, "/")}
   end
 
   @doc """
   Set the `Vault.Http` adapter for the client.
   """
   @spec set_http(t, http) :: t
-  def set_http(%__MODULE__{} = client, http) do
-    %{client | http: http}
+  def set_http(%__MODULE__{} = vault, http) do
+    %{vault | http: http}
   end
 
   @doc """
   Set the `Vault.Engine` for the client.
   """
   @spec set_engine(t, engine) :: t
-  def set_engine(%__MODULE__{} = client, engine) do
-    %{client | engine: engine}
+  def set_engine(%__MODULE__{} = vault, engine) do
+    %{vault | engine: engine}
   end
 
   @doc """
   Set the `Vault.Auth` for the client.
   """
   @spec set_auth(t, auth) :: t
-  def set_auth(%__MODULE__{} = client, auth) do
-    %{client | auth: auth}
+  def set_auth(%__MODULE__{} = vault, auth) do
+    %{vault | auth: auth}
   end
 
   @doc """
@@ -223,16 +223,16 @@ defmodule Vault do
   unset, the auth adapter may provide a default. See your Auth adapter for details.
   """
   @spec set_auth_path(t, auth_path) :: t
-  def set_auth_path(%__MODULE__{} = client, auth_path) when is_binary(auth_path) do
-    %{client | auth_path: auth_path}
+  def set_auth_path(%__MODULE__{} = vault, auth_path) when is_binary(auth_path) do
+    %{vault | auth_path: auth_path}
   end
 
   @doc """
   Sets the default login credentials for this client.
   """
   @spec set_credentials(t, map) :: t
-  def set_credentials(%__MODULE__{} = client, creds) when is_map(creds) do
-    %{client | credentials: creds}
+  def set_credentials(%__MODULE__{} = vault, creds) when is_map(creds) do
+    %{vault | credentials: creds}
   end
 
   @doc """
@@ -243,20 +243,20 @@ defmodule Vault do
   override existing credential keys. 
   """
   @spec auth(t, map) :: {:ok, t} | {:error, [term]}
-  def auth(client, params \\ %{})
+  def auth(vault, params \\ %{})
   def auth(%__MODULE__{auth: _, http: nil}, _params), do: {:error, ["http client not set"]}
   def auth(%__MODULE__{auth: nil, http: _}, _params), do: {:error, ["auth client not set"]}
 
-  def auth(%__MODULE__{auth: auth, credentials: creds} = client, params) do
+  def auth(%__MODULE__{auth: auth, credentials: creds} = vault, params) do
     new_creds = Map.merge(creds, params)
 
-    case auth.login(client, new_creds) do
+    case auth.login(vault, new_creds) do
       {:ok, token, ttl} ->
         expires_at = NaiveDateTime.utc_now() |> NaiveDateTime.add(ttl, :seconds)
 
         {:ok,
          %{
-           client
+           vault
            | token: token,
              token_expires_at: expires_at,
              credentials: new_creds
@@ -293,7 +293,7 @@ defmodule Vault do
   for further configuration, such as fetching a versioned secret.
   """
   @spec read(t, String.t(), list()) :: {:ok, map} | {:error, term}
-  def read(client, path, options \\ [])
+  def read(vault, path, options \\ [])
 
   def read(%__MODULE__{engine: _, http: nil}, _path, _options),
     do: {:error, ["http client not set"]}
@@ -301,8 +301,8 @@ defmodule Vault do
   def read(%__MODULE__{engine: nil, http: _}, _path, _options),
     do: {:error, ["secret engine not set"]}
 
-  def read(%__MODULE__{engine: engine} = client, path, options) do
-    engine.read(client, String.trim_leading(path, "/"), options)
+  def read(%__MODULE__{engine: engine} = vault, path, options) do
+    engine.read(vault, String.trim_leading(path, "/"), options)
   end
 
   @doc """
@@ -311,7 +311,7 @@ defmodule Vault do
   configuration (such as versioning)
   """
   @spec write(t, String.t(), term, list()) :: {:ok, map} | {:error, term}
-  def write(client, path, value, options \\ [])
+  def write(vault, path, value, options \\ [])
 
   def write(%__MODULE__{engine: _, http: nil}, _path, _value, _options),
     do: {:error, ["http client not set"]}
@@ -319,8 +319,8 @@ defmodule Vault do
   def write(%__MODULE__{engine: nil, http: _}, _path, _value, _options),
     do: {:error, ["secret engine not set"]}
 
-  def write(%__MODULE__{engine: engine} = client, path, value, options) do
-    case engine.write(client, String.trim_leading(path, "/"), value, options) do
+  def write(%__MODULE__{engine: engine} = vault, path, value, options) do
+    case engine.write(vault, String.trim_leading(path, "/"), value, options) do
       {:ok, data} ->
         {:ok, Map.merge(data || %{}, %{"value" => value})}
 
@@ -334,7 +334,7 @@ defmodule Vault do
   for further configuration.
   """
   @spec list(t, String.t(), list()) :: {:ok, map} | {:error, term}
-  def list(client, path, options \\ [])
+  def list(vault, path, options \\ [])
 
   def list(%__MODULE__{engine: _, http: nil}, _path, _options),
     do: {:error, ["http client not set"]}
@@ -342,8 +342,8 @@ defmodule Vault do
   def list(%__MODULE__{engine: nil, http: _}, _path, _options),
     do: {:error, ["secret engine not set"]}
 
-  def list(%__MODULE__{engine: engine} = client, path, options) do
-    engine.list(client, String.trim_leading(path, "/"), options)
+  def list(%__MODULE__{engine: engine} = vault, path, options) do
+    engine.list(vault, String.trim_leading(path, "/"), options)
   end
 
   @doc """
@@ -352,7 +352,7 @@ defmodule Vault do
   for further configuration.
   """
   @spec delete(t, String.t(), list()) :: {:ok, map} | {:error, term}
-  def delete(client, path, options \\ [])
+  def delete(vault, path, options \\ [])
 
   def delete(%__MODULE__{engine: _, http: nil}, _path, _options),
     do: {:error, ["http client not set"]}
@@ -360,8 +360,8 @@ defmodule Vault do
   def delete(%__MODULE__{engine: nil, http: _}, _path, _options),
     do: {:error, ["secret engine not set"]}
 
-  def delete(%__MODULE__{engine: engine} = client, path, options) do
-    engine.delete(client, String.trim_leading(path, "/"), options)
+  def delete(%__MODULE__{engine: engine} = vault, path, options) do
+    engine.delete(vault, String.trim_leading(path, "/"), options)
   end
 
   @methods [:get, :put, :post, :patch, :head, :delete]
@@ -388,14 +388,14 @@ defmodule Vault do
   Here's a genneric example for making a request:
 
   ```
-  client = Vault.new(
+  vault = Vault.new(
     http: Vault.Http.Tesla, 
     host: "http://localhost", 
     token: "token"
     token_expires_in: NaiveDateTime.utc_now()
   )
 
-  Vault.request(client, :post, "path/to/call", [ body: %{ "foo" => "bar"}])
+  Vault.request(vault, :post, "path/to/call", [ body: %{ "foo" => "bar"}])
   # POST to http://localhost/v1/path/to/call
   # with headers: {"X-Vault-Token", "token"}
   # and a JSON payload of: "{ 'foo': 'bar'}"
@@ -404,7 +404,7 @@ defmodule Vault do
   ### AWS lease renewal
   A quick example of renewing a lease.
   ```
-  client = Vault.new(
+  vault = Vault.new(
     http: Vault.Http.Tesla, 
     host: "http://localhost", 
     token: "token"
@@ -412,14 +412,14 @@ defmodule Vault do
   )
 
   body = %{lease_id: lease, increment: increment}
-  {:ok, response} = Vault.request(client, request(:put, "sys/leases/renew", [body: body])
+  {:ok, response} = Vault.request(vault, request(:put, "sys/leases/renew", [body: body])
   ```
 
 
   """
 
   @spec request(t, method, String.t(), list) :: {:ok, term} | {:error, list()}
-  def request(client, method, path, options \\ [])
+  def request(vault, method, path, options \\ [])
 
   def request(%__MODULE__{http: nil}, _method, _path, _options),
     do: {:error, ["http client not set."]}

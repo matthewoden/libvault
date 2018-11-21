@@ -3,7 +3,7 @@ defmodule Vault.Engine.Test do
   Get and Put secrets using the a local Test engine.
   """
 
-  @type client :: Vault.Client.t()
+  @type vault :: Vault.t()
   @type path :: String.t()
   @type options :: Keyword.t()
   @type token :: String.t()
@@ -12,11 +12,7 @@ defmodule Vault.Engine.Test do
 
   @behaviour Vault.Engine.Adapter
 
-  @doc """
-  Gets a value from vault.
-  """
-  @spec read(client, path, options) :: {:ok, value} | {:error, errors}
-  def read(_client, path, []) do
+  def read(_vault, path, []) do
     case path do
       "secret/that/is/present" ->
         {:ok, "secret"}
@@ -26,16 +22,33 @@ defmodule Vault.Engine.Test do
     end
   end
 
-  @doc """
-  Puts a value in vault.
-  """
-  @spec write(client, path, value, options) :: {:ok, map()} | {:error, errors}
-  def write(_client, path, _value, []) do
+
+  def write(_vault, path, _value, []) do
     case path do
       "secret/with/permission" ->
         {:ok, %{}}
 
       "secret/without/permission" ->
+        {:error, ["Unauthorized"]}
+    end
+  end
+
+  def list(_vault, path, []) do
+    case path do
+      "secret/to/list/" ->
+        {:ok, %{"keys" => ["hello", "world"]}}
+
+      "secret/error/list/" ->
+        {:error, ["Unauthorized"]}
+    end
+  end
+
+  def delete(_vault, path, []) do
+    case path do
+      "secret/to/delete" ->
+        {:ok, %{}}
+
+      "secret/error/delete" ->
         {:error, ["Unauthorized"]}
     end
   end

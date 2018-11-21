@@ -1,14 +1,14 @@
 defmodule Vault.Engine.Generic do
   @moduledoc """
   A generic Vault.Engine adapter. Most of the vault secret engines don't use a 
-  wildly different API, so if you're using an engine that's not explictly supported,
-  this should get you 99% of the way there.
+  wildly different API, and can be handled with a single adapter.
 
+  ## Request Details
   By default, `read` runs a GET request, `write` does a POST, `list` does a GET 
   with an appended `?list=true`, and `delete` runs a DELETE. The options below 
-  turn the Generic engine into to something resembling a REST client.
+  should give you additional flexibility.
 
-  Options: 
+  ### Request Options: 
   - :method - one of :get, :put, :post, :options, :patch, :head
   - :full_response - if `true`, returns the full response body on success, rather than just the `data` key. Defaults to `false`,
   - :query_params - query params for the request. Defaults to `%{}` (no params)
@@ -16,9 +16,9 @@ defmodule Vault.Engine.Generic do
 
   ## Examples
 
-  Create a generic client:
+  Create a generic vault client:
 
-    {:ok, client } = 
+    {:ok, vault } = 
       Vault.new(
         host: System.get_env("VAULT_ADDR"),
         auth: Vault.Auth.Token,
@@ -28,17 +28,17 @@ defmodule Vault.Engine.Generic do
 
   Read/Write from the cubbyhole secret engine.
 
-    {:ok, _data} = Vault.write(client(), "cubbyhole/hello",  %{"foo" => "bar"})
-    {:ok, %{"foo" => "bar"}} = Vault.read(client(), "cubbyhole/hello")
+    {:ok, _data} = Vault.write(vault, "cubbyhole/hello",  %{"foo" => "bar"})
+    {:ok, %{"foo" => "bar"}} = Vault.read(vault, "cubbyhole/hello")
 
   Read/Write from the ssh secret engine.
 
     # create a key
-    {:ok, _} = Vault.write(client(), "ssh/keys/test", %{key: key})
+    {:ok, _} = Vault.write(vault, "ssh/keys/test", %{key: key})
 
     # create a role for that key
     {:ok, _} =
-      Vault.write(client(), "ssh/roles/test", %{
+      Vault.write(vault, "ssh/roles/test", %{
         key: "test",
         key_type: "dynamic",
         default_user: "tester",
@@ -47,7 +47,7 @@ defmodule Vault.Engine.Generic do
 
     # read a role, and return the full response
     {:ok, %{ "data" => data } } = 
-      Vault.read(client(), "ssh-client-signer/roles/test", full_response: true)
+      Vault.read(vault, "ssh-client-signer/roles/test", full_response: true)
 
   Options: 
   - :method - one of :get, :put, :post, :options, :patch, :head
@@ -57,7 +57,7 @@ defmodule Vault.Engine.Generic do
   """
 
   @behaviour Vault.Engine.Adapter
-  @type client :: Vault.Client.t()
+  @type vault :: Vault.t()
   @type path :: String.t()
   @type options :: Keyword.t()
   @type token :: String.t()
@@ -65,24 +65,23 @@ defmodule Vault.Engine.Generic do
   @type errors :: list()
 
   @doc """
-  Gets a value from vault. Defaults to a GET request against the current path. See option details above for full configuration
+  Gets a value from vault. Defaults to a GET request against the current path. 
+  See `optionx` details above for full configuration.
   """
   @impl true
-  @spec read(client, path, options) :: {:ok, value} | {:error, errors}
-  def read(client, path, options \\ []) do
+  def read(vault, path, options \\ []) do
     options = Keyword.merge([method: :get], options)
-    request(client, path, %{}, options)
+    request(vault, path, %{}, options)
   end
 
   @doc """
   Puts a value in vault. Defaults to a POST request against the provided path.  
-  See option details above for full configuration
+  See `options` details above for full configuration.
   """
   @impl true
-  @spec write(client, path, value, options) :: {:ok, map()} | {:error, errors}
-  def write(client, path, value, options \\ []) do
+  def write(vault, path, value, options \\ []) do
     options = Keyword.merge([method: :post], options)
-    request(client, path, value, options)
+    request(vault, path, value, options)
   end
 
   @doc """
@@ -97,7 +96,7 @@ defmodule Vault.Engine.Generic do
   {:ok, %{ 
       "keys"=> ["foo", "foo/"] 
     } 
-  } = Vault.Engine.Generic.List(client, "path/to/list/", [full_response: true])
+  } = Vault.Engine.Generic.list(vault, "path/to/list/", [full_response: true])
   ```
   With the full Response:
 
@@ -107,24 +106,22 @@ defmodule Vault.Engine.Generic do
         "keys"=> ["foo", "foo/"]
       },
     }
-  }  = Vault.Engine.Generic.List(client, "path/to/list/", [full_response: true])
+  }  = Vault.Engine.Generic.list(vault, "path/to/list/", [full_response: true])
   ```
   """
   @impl true
-  @spec list(client, path, options) :: {:ok, map()} | {:error, errors}
-  def list(client, path, options \\ []) do
+  def list(vault, path, options \\ []) do
     options = Keyword.merge([method: :get, query_params: %{list: true}], options)
-    request(client, path, %{}, options)
+    request(vault, path, %{}, options)
   end
 
   @impl true
-  @spec delete(client, path, options) :: {:ok, map()} | {:error, errors}
-  def delete(client, path, options \\ []) do
+  def delete(vault, path, options \\ []) do
     options = Keyword.merge([method: :delete], options)
-    request(client, path, %{}, options)
+    request(vault, path, %{}, options)
   end
 
-  defp request(%{http: http, host: host, token: token}, path, value, options) do
+  defp request(%Vault{http: http, host: host, token: token}, path, value, options) do
     headers = if token, do: [{"X-Vault-Token", token}], else: []
     method = Keyword.get(options, :method, :post)
     full_response = Keyword.get(options, :full_response, false)

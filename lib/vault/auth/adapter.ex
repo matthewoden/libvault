@@ -54,7 +54,7 @@ defmodule Vault.Auth.Adapter do
   ```
   """
 
-  @type client :: Vault.t()
+  @type vault :: Vault.t()
   @type params :: map()
 
   @type token :: String.t()
@@ -63,5 +63,5 @@ defmodule Vault.Auth.Adapter do
 
   @type response :: {:ok, token, ttl} | {:error, errors}
 
-  @callback login(client, params) :: response
+  @callback login(vault, params) :: response
 end
