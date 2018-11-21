@@ -84,7 +84,6 @@ defmodule Vault.Engine.Generic do
     request(client, path, value, options)
   end
 
-
   @impl true
   @spec write(client, path, value, options) :: {:ok, map()} | {:error, errors}
   def list(client, path, value, options \\ []) do

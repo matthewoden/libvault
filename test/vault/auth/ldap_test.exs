@@ -99,7 +99,7 @@ defmodule Vault.Auth.LdapTest do
         auth: Vault.Auth.LDAP,
         http: Vault.Http.Test
       )
-      |> Vault.login(%{ password: "error"})
+      |> Vault.login(%{password: "error"})
 
     assert reason =~ "Missing credentials"
   end
@@ -111,7 +111,7 @@ defmodule Vault.Auth.LdapTest do
         auth: Vault.Auth.LDAP,
         http: Vault.Http.Test
       )
-      |> Vault.login(%{ password: "error"})
+      |> Vault.login(%{password: "error"})
 
     assert reason =~ "Missing credentials"
   end

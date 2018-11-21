@@ -29,6 +29,7 @@ defmodule Vault.Auth.JWTTest do
                "role" => "valid-role",
                "jwt" => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
              }
+
       conn
       |> Plug.Conn.put_resp_content_type("application/json")
       |> Plug.Conn.resp(200, Jason.encode!(@valid_response))
@@ -55,6 +56,7 @@ defmodule Vault.Auth.JWTTest do
                "role" => "valid-role",
                "jwt" => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
              }
+
       conn
       |> Plug.Conn.put_resp_content_type("application/json")
       |> Plug.Conn.resp(200, Jason.encode!(@valid_response))
@@ -73,7 +75,6 @@ defmodule Vault.Auth.JWTTest do
     assert client.token == "valid_token"
     assert client.credentials == @credentials
   end
-
 
   test "JWT login with invalid credentials", %{bypass: bypass} do
     Bypass.expect_once(bypass, "POST", "/v1/auth/jwt/login", fn conn ->

@@ -27,8 +27,7 @@ defmodule Vault.Engine.KVV1 do
 
   @impl true
   defdelegate list(client, path, options \\ []), to: Vault.Engine.Generic
-  
+
   @impl true
   defdelegate delete(client, path, options \\ []), to: Vault.Engine.Generic
-
 end

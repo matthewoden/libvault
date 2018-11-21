@@ -32,7 +32,6 @@ defmodule Vault.Auth.UserPassTest do
     assert client.credentials == @credentials
   end
 
-
   test "Userpass login with custom mount path", %{bypass: bypass} do
     Bypass.expect_once(bypass, "POST", "/v1/auth/loserpass/login/username", fn conn ->
       {:ok, body, conn} = Plug.Conn.read_body(conn)
@@ -100,7 +99,7 @@ defmodule Vault.Auth.UserPassTest do
         auth: Vault.Auth.UserPass,
         http: Vault.Http.Test
       )
-      |> Vault.login(%{ password: "error"})
+      |> Vault.login(%{password: "error"})
 
     assert reason =~ "Missing credentials"
   end
@@ -112,7 +111,7 @@ defmodule Vault.Auth.UserPassTest do
         auth: Vault.Auth.UserPass,
         http: Vault.Http.Test
       )
-      |> Vault.login(%{ password: "error"})
+      |> Vault.login(%{password: "error"})
 
     assert reason =~ "Missing credentials"
   end

@@ -32,7 +32,6 @@ defmodule Vault.Auth.GithubTest do
     assert client.credentials == @credentials
   end
 
-
   test "Github login with custom mount path", %{bypass: bypass} do
     Bypass.expect_once(bypass, "POST", "/v1/auth/ghe/login", fn conn ->
       {:ok, body, conn} = Plug.Conn.read_body(conn)
