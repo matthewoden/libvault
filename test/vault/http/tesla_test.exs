@@ -95,4 +95,18 @@ defmodule Vault.Http.Tesla.Test do
     assert {:ok, %{body: ""}} =
              Http.request(:head, "http://localhost:#{bypass.port}/", %{}, [{"test", true}])
   end
+
+  test "Can handle redirects", %{bypass: bypass} do
+    Bypass.expect_once(bypass, "GET", "/", fn conn ->
+      Plug.Conn.put_resp_header(conn, "location", "/redirect")
+      |> Plug.Conn.resp(307, "Redirecting...")
+    end)
+
+    Bypass.expect_once(bypass, "GET", "/redirect", fn conn ->
+      Plug.Conn.resp(conn, 200, ~s<{"ok": true}>)
+    end)
+
+    assert {:ok, %{body: ~s<{"ok": true}>}} =
+             Http.request(:get, "http://localhost:#{bypass.port}/", %{}, [])
+  end
 end
