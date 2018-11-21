@@ -25,7 +25,7 @@ defmodule Vault.Auth.UserPassTest do
         auth: Vault.Auth.UserPass,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert Vault.token_expired?(client) == false
     assert client.token == "token"
@@ -49,7 +49,7 @@ defmodule Vault.Auth.UserPassTest do
         auth_path: "loserpass",
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert Vault.token_expired?(client) == false
     assert client.token == "token"
@@ -69,7 +69,7 @@ defmodule Vault.Auth.UserPassTest do
         auth: Vault.Auth.UserPass,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert reason == ["Invalid Credentials"]
   end
@@ -87,7 +87,7 @@ defmodule Vault.Auth.UserPassTest do
         auth: Vault.Auth.UserPass,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert reason =~ "Unexpected response from vault"
   end
@@ -99,7 +99,7 @@ defmodule Vault.Auth.UserPassTest do
         auth: Vault.Auth.UserPass,
         http: Vault.Http.Test
       )
-      |> Vault.login(%{password: "error"})
+      |> Vault.auth(%{password: "error"})
 
     assert reason =~ "Missing credentials"
   end
@@ -111,7 +111,7 @@ defmodule Vault.Auth.UserPassTest do
         auth: Vault.Auth.UserPass,
         http: Vault.Http.Test
       )
-      |> Vault.login(%{password: "error"})
+      |> Vault.auth(%{password: "error"})
 
     assert reason =~ "Missing credentials"
   end
@@ -123,7 +123,7 @@ defmodule Vault.Auth.UserPassTest do
         auth: Vault.Auth.UserPass,
         http: Vault.Http.Test
       )
-      |> Vault.login(%{username: "error", password: "error"})
+      |> Vault.auth(%{username: "error", password: "error"})
 
     assert reason =~ "Http adapter error"
   end
@@ -135,7 +135,7 @@ defmodule Vault.Auth.UserPassTest do
         auth: Vault.Auth.UserPass,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(%{username: "tester", password: "foo"})
+      |> Vault.auth(%{username: "tester", password: "foo"})
 
     assert client.token != nil
     assert Vault.token_expired?(client) == false

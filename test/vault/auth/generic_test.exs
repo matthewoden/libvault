@@ -34,7 +34,7 @@ defmodule Vault.Auth.GenericTest do
         auth: Vault.Auth.Generic,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert Vault.token_expired?(client) == false
     assert client.token == "token"
@@ -54,7 +54,7 @@ defmodule Vault.Auth.GenericTest do
         auth: Vault.Auth.Generic,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert reason == ["Invalid Credentials"]
   end
@@ -72,7 +72,7 @@ defmodule Vault.Auth.GenericTest do
         auth: Vault.Auth.Generic,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert reason =~ "Unexpected response from vault"
   end
@@ -84,7 +84,7 @@ defmodule Vault.Auth.GenericTest do
         auth: Vault.Auth.Generic,
         http: Vault.Http.Test
       )
-      |> Vault.login(%{
+      |> Vault.auth(%{
         request: %{
           path: "userpass/login/tester",
           body: %{password: "error"}
@@ -105,7 +105,7 @@ defmodule Vault.Auth.GenericTest do
         auth: Vault.Auth.Generic,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(%{
+      |> Vault.auth(%{
         request: %{
           path: "userpass/login/tester",
           body: %{password: "foo"}
@@ -127,7 +127,7 @@ defmodule Vault.Auth.GenericTest do
         auth: Vault.Auth.Generic,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(%{
+      |> Vault.auth(%{
         request: %{
           path: "userpass/login/tester",
           body: %{password: "foo"}

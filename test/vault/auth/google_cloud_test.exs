@@ -46,7 +46,7 @@ defmodule Vault.Auth.GoogleCloudTest do
         auth: Vault.Auth.GoogleCloud,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert Vault.token_expired?(client) == false
     assert client.token == "valid_token"
@@ -74,7 +74,7 @@ defmodule Vault.Auth.GoogleCloudTest do
         auth_path: "google",
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert Vault.token_expired?(client) == false
     assert client.token == "valid_token"
@@ -94,7 +94,7 @@ defmodule Vault.Auth.GoogleCloudTest do
         auth: Vault.Auth.GoogleCloud,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert reason == ["Invalid Credentials"]
   end
@@ -112,7 +112,7 @@ defmodule Vault.Auth.GoogleCloudTest do
         auth: Vault.Auth.GoogleCloud,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert reason =~ "Unexpected response from vault"
   end
@@ -124,7 +124,7 @@ defmodule Vault.Auth.GoogleCloudTest do
         auth: Vault.Auth.GoogleCloud,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(%{jwt: "present"})
+      |> Vault.auth(%{jwt: "present"})
 
     assert reason =~ "Missing credentials"
   end
@@ -136,7 +136,7 @@ defmodule Vault.Auth.GoogleCloudTest do
         auth: Vault.Auth.GoogleCloud,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(%{role: "role"})
+      |> Vault.auth(%{role: "role"})
 
     assert reason =~ "Missing credentials"
   end
@@ -148,7 +148,7 @@ defmodule Vault.Auth.GoogleCloudTest do
         auth: Vault.Auth.GoogleCloud,
         http: Vault.Http.Test
       )
-      |> Vault.login(%{role: "error", jwt: "error"})
+      |> Vault.auth(%{role: "error", jwt: "error"})
 
     assert reason =~ "Http adapter error"
   end

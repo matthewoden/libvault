@@ -25,7 +25,7 @@ defmodule Vault.Auth.GithubTest do
         auth: Vault.Auth.Github,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert Vault.token_expired?(client) == false
     assert client.token == "token"
@@ -49,7 +49,7 @@ defmodule Vault.Auth.GithubTest do
         auth_path: "ghe",
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert Vault.token_expired?(client) == false
     assert client.token == "token"
@@ -69,7 +69,7 @@ defmodule Vault.Auth.GithubTest do
         auth: Vault.Auth.Github,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert reason == ["Invalid Credentials"]
   end
@@ -87,7 +87,7 @@ defmodule Vault.Auth.GithubTest do
         auth: Vault.Auth.Github,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert reason =~ "Unexpected response from vault"
   end
@@ -99,7 +99,7 @@ defmodule Vault.Auth.GithubTest do
         auth: Vault.Auth.Github,
         http: Vault.Http.Test
       )
-      |> Vault.login(%{})
+      |> Vault.auth(%{})
 
     assert reason =~ "Missing credentials"
   end
@@ -111,7 +111,7 @@ defmodule Vault.Auth.GithubTest do
         auth: Vault.Auth.Github,
         http: Vault.Http.Test
       )
-      |> Vault.login(%{token: "error"})
+      |> Vault.auth(%{token: "error"})
 
     assert reason =~ "Http adapter error"
   end

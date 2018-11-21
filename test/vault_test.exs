@@ -61,20 +61,20 @@ defmodule VaultTest do
     assert client.credentials == credentials
   end
 
-  test "login() returns an error if the http client is nil" do
-    response = Vault.new(auth: Some.Adapter, http: nil) |> Vault.login()
+  test "auth() returns an error if the http client is nil" do
+    response = Vault.new(auth: Some.Adapter, http: nil) |> Vault.auth()
     assert response == {:error, ["http client not set"]}
   end
 
-  test "login() returns an error if the auth client is nil" do
-    response = Vault.new(http: Some.Adapter, auth: nil) |> Vault.login()
+  test "auth() returns an error if the auth client is nil" do
+    response = Vault.new(http: Some.Adapter, auth: nil) |> Vault.auth()
     assert response == {:error, ["auth client not set"]}
   end
 
   test "login returns a tuple of {:ok, client}, containing a client with a valid token on a successful login." do
     {:ok, client} =
       Vault.new(http: Some.Adapter, auth: Vault.Auth.Test)
-      |> Vault.login(%{username: "good_credentials", password: "whatever"})
+      |> Vault.auth(%{username: "good_credentials", password: "whatever"})
 
     assert client.token == "token"
     assert Vault.token_expired?(client) === false
@@ -83,7 +83,7 @@ defmodule VaultTest do
   test "login returns a tuple of {:error, reason} when the login adapter fails to log in" do
     {:error, reason} =
       Vault.new(http: Some.Adapter, auth: Vault.Auth.Test)
-      |> Vault.login(%{username: "bad_credentials", password: "whatever"})
+      |> Vault.auth(%{username: "bad_credentials", password: "whatever"})
 
     assert reason == ["an error message"]
   end

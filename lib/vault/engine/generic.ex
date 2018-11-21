@@ -20,11 +20,11 @@ defmodule Vault.Engine.Generic do
 
     {:ok, client } = 
       Vault.new(
-        host: System.get_env("VAULT_URL"),
+        host: System.get_env("VAULT_ADDR"),
         auth: Vault.Auth.Token,
         engine: Vault.Engine.Generic,
         http: Vault.Http.Tesla,
-      ) |> Vault.login(token)
+      ) |> Vault.auth(%{token: "token"})
 
   Read/Write from the cubbyhole secret engine.
 

@@ -57,7 +57,7 @@ defmodule Vault.Auth.Generic do
       engine: Vault.KVV2
     ])
 
-  {:ok, client} = Vault.login(client, %{ 
+  {:ok, client} = Vault.auth(client, %{ 
     request: %{
       path: "/jwt/login", 
       body: %{role: "my-role", jwt: "my-jwt" }, 

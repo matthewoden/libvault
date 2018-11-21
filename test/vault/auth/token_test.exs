@@ -26,7 +26,7 @@ defmodule Vault.Auth.TokenTest do
         auth: Vault.Auth.Token,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert Vault.token_expired?(client) == false
     assert client.token == "token"
@@ -46,7 +46,7 @@ defmodule Vault.Auth.TokenTest do
         auth: Vault.Auth.Token,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert reason == ["Invalid Credentials"]
   end
@@ -64,7 +64,7 @@ defmodule Vault.Auth.TokenTest do
         auth: Vault.Auth.Token,
         http: Vault.Http.Tesla
       )
-      |> Vault.login(@credentials)
+      |> Vault.auth(@credentials)
 
     assert reason =~ "Unexpected response from vault"
   end
@@ -76,7 +76,7 @@ defmodule Vault.Auth.TokenTest do
         auth: Vault.Auth.Token,
         http: Vault.Http.Test
       )
-      |> Vault.login(%{token: "error"})
+      |> Vault.auth(%{token: "error"})
 
     assert reason =~ "Http adapter error"
   end
@@ -92,9 +92,9 @@ defmodule Vault.Auth.TokenTest do
         http: Vault.Http.Tesla
       )
 
-    {:ok, %{token: token}} = Vault.login(client, %{username: "tester", password: "foo"})
+    {:ok, %{token: token}} = Vault.auth(client, %{username: "tester", password: "foo"})
 
-    {:ok, client} = Vault.set_auth(client, Vault.Auth.Token) |> Vault.login(%{token: token})
+    {:ok, client} = Vault.set_auth(client, Vault.Auth.Token) |> Vault.auth(%{token: token})
 
     assert client.token != nil
     assert Vault.token_expired?(client) == false

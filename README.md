@@ -5,8 +5,8 @@ for multiple backends, and reading, writing, listing, and deleting secrets
 for a variety of engines.
 
 When possible, it tries to emulate the CLI, with `read`, `write`, `list` and
-`delete` methods. An additional `request` method is provided when you need
-further flexibility.
+`delete` and `auth` methods. An additional `request` method is provided when you need
+further flexibility with the API.
 
 ## Configuration / Adapters
 
@@ -21,6 +21,8 @@ The following http Adapters are provided:
 
 - `Tesla` with `Vault.Http.Tesla`
   - Can be configured to use `:hackney`, `:ibrowse`, or `:httpc`
+
+Be sure to add applications and dependancies to your mixfile as needed.
 
 ## Auth Adapters
 
@@ -50,16 +52,16 @@ its own adapter:
 
 - [Key/Value](https://www.vaultproject.io/api/secret/kv/index.html)
   - [v1](https://www.vaultproject.io/api/secret/kv/kv-v1.html) with `Vault.Engine.KVV1`
-  - [v2](https://www.vaultproject.io/api/secret/kv/kv-v2.html) with `Vault.Engine.KVV1`
+  - [v2](https://www.vaultproject.io/api/secret/kv/kv-v2.html) with `Vault.Engine.KVV2`
 
-### Request Flexibility
+## Request Flexibility
 
 The core library only handles the basics around secret fetching. If you need to
 access additional API endpoints, this library also provides a `Vault.request`
 method. This should allow you to tap into the full vault REST API, while still
 benefiting from token control, JSON parsing, and other HTTP client nicities.
 
-## Usage
+## Usage Example
 
 Example usage:
 
@@ -70,20 +72,20 @@ client =
     auth: Vault.Auth.UserPass,
     credentials: %{username: "username", password: "password"}
   ])
-  |> Vault.login()
+  |> Vault.auth()
 
 {:ok, db_pass} = Vault.read(client, "secret/path/to/password")
-{:ok, aws_creds} = Vault.read(client, "secret/path/to/creds")
+{:ok, %{"version" => 1 }} = Vault.write(client, "secret/path/to/creds", %{secret: "secrets!"})
 ```
 
-You can configure the client up front, or change configuration dynamically.
+You can configure the client up front, or change configuration on the fly.
 
 ```
   client =
     Vault.new()
     |> Vault.set_auth(Vault.Auth.Approle)
-    |> Vault.set_engine(Vault.Engine.KVV1)
-    |> Vault.login(%{role_id: "role_id", secret_id: "secret_id"})
+    |> Vault.set_engine(Vault.Engine.Generic)
+    |> Vault.auth(%{role_id: "role_id", secret_id: "secret_id"})
 
   {:ok, db_pass} = Vault.read(client, "secret/path/to/password")
 

@@ -66,7 +66,7 @@ defmodule Vault do
       auth: Vault.Auth.UserPass, 
       credentials: %{username: "username", password: "password"}
     ]) 
-    |> Vault.login()
+    |> Vault.auth()
 
   {:ok, db_pass} = Vault.read(client, "secret/path/to/password")
   {:ok, aws_creds} = Vault.read(client, "secret/path/to/creds")
@@ -78,7 +78,7 @@ defmodule Vault do
     client = 
       Vault.new()
       |> Vault.set_auth(Vault.Auth.Approle)
-      |> Vault.login(%{role_id: "role_id", secret_id: "secret_id"})
+      |> Vault.auth(%{role_id: "role_id", secret_id: "secret_id"})
 
     {:ok, db_pass} = Vault.read(client, "secret/path/to/password")
 
@@ -236,18 +236,18 @@ defmodule Vault do
   end
 
   @doc """
-  Get a token for the configured auth provider. Log in to get a token, then 
+  Get a token for the configured auth provider. Authenticate to get a token, then 
   perform a number of vault operations.
 
-  Uses pre-configured login credentials if present. Passed in credentials will
+  Uses pre-configured credentials if provided. Passed in credentials will
   override existing credential keys. 
   """
-  @spec login(t, map) :: {:ok, t} | {:error, [term]}
-  def login(client, params \\ %{})
-  def login(%__MODULE__{auth: _, http: nil}, _params), do: {:error, ["http client not set"]}
-  def login(%__MODULE__{auth: nil, http: _}, _params), do: {:error, ["auth client not set"]}
+  @spec auth(t, map) :: {:ok, t} | {:error, [term]}
+  def auth(client, params \\ %{})
+  def auth(%__MODULE__{auth: _, http: nil}, _params), do: {:error, ["http client not set"]}
+  def auth(%__MODULE__{auth: nil, http: _}, _params), do: {:error, ["auth client not set"]}
 
-  def login(%__MODULE__{auth: auth, credentials: creds} = client, params) do
+  def auth(%__MODULE__{auth: auth, credentials: creds} = client, params) do
     new_creds = Map.merge(creds, params)
 
     case auth.login(client, new_creds) do
@@ -377,7 +377,7 @@ defmodule Vault do
   ## Examples
 
   Requests can take the following options a Keyword List.
-  
+
   ### options:
   - `:query_params` - a keyword list of query params for the request. Do **not** include query params on the path.
   - `:body` - Map. The body for the request
