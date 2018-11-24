@@ -23,7 +23,7 @@ defmodule Vault.Auth.GithubTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Github,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -47,7 +47,7 @@ defmodule Vault.Auth.GithubTest do
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Github,
         auth_path: "ghe",
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -67,7 +67,7 @@ defmodule Vault.Auth.GithubTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Github,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -85,7 +85,7 @@ defmodule Vault.Auth.GithubTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Github,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 

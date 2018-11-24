@@ -9,6 +9,7 @@ defmodule Vault.Auth.LdapTest do
   @credentials %{username: "good_credentials", password: "p@55w0rd"}
   @valid_response %{auth: %{client_token: "token", lease_duration: 2000}}
 
+  @tag :ldap
   test "LDAP login with valid credentials", %{bypass: bypass} do
     Bypass.expect_once(bypass, "POST", "/v1/auth/ldap/login/good_credentials", fn conn ->
       {:ok, body, conn} = Plug.Conn.read_body(conn)
@@ -23,7 +24,7 @@ defmodule Vault.Auth.LdapTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.LDAP,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -47,7 +48,7 @@ defmodule Vault.Auth.LdapTest do
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.LDAP,
         auth_path: "dapper",
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -67,7 +68,7 @@ defmodule Vault.Auth.LdapTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.LDAP,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -85,7 +86,7 @@ defmodule Vault.Auth.LdapTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.LDAP,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 

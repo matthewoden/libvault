@@ -6,18 +6,42 @@ defmodule Vault do
   `delete` methods. An additional `request` method is provided when you need
   further flexibility. 
 
+  ## API Preview
+
+  ```elixir
+  vault =
+    Vault.new([
+      engine: Vault.Engine.KVV2, 
+      auth: Vault.Auth.UserPass 
+    ])
+    |> Vault.auth(%{username: "username", password: "password"})
+
+  {:ok, db_pass} = Vault.read(vault, "secret/path/to/password")
+  {:ok, %{"version" => 1 }} = Vault.write(vault, "secret/path/to/creds", %{secret: "secrets!"})
+  ```
+
   ## Flexibility
 
   Hashicorp's Vault is highly configurable. Rather than cover every possible option,
   this library strives to be flexible and adaptable. Auth backends, Secret 
-  Engines, and Http clients are all replacable, and each behaviour asks for a 
-  minimal contract. 
+  Engines, and Http clients, and JSON parsers are all replacable, and each 
+  behaviour asks for a minimal behaviour contract. 
 
-  ### Http Adapters
+  ### HTTP Adapters
 
-  The following http Adapters are provided:
-  - `Tesla` with `Vault.Http.Tesla`
-    - Can be configured to use `:hackney`, `:ibrowse`, or `:httpc`
+  The following HTTP Adapters are provided:
+  - `Tesla` with `Vault.HTTP.Tesla`
+    - Can be configured to use `:hackney`, `:ibrowse`, or `:httpc` (and in turn, plays nice with `HTTPoison`, and `HTTPotion`)
+
+  ### JSON Adapters
+
+  Most JSON libraries provide the same methods, so no default adapter is needed.
+  You can use `Jason`, `JSX`, `Poison`, or whatever encoder you want.
+  
+  Defaults to `Jason` if present, falling back to `Poison` if present,
+  ultimately falling back to `nil`.
+
+  See `Vault.JSON.Adapter` for the full behaviour interface.
 
   ### Auth Adapters
 
@@ -48,14 +72,43 @@ defmodule Vault do
     - [v2](https://www.vaultproject.io/api/secret/kv/kv-v2.html) with `Vault.Engine.KVV1`
 
 
-  ### Request Flexibility
+  ### Additional request methods
 
   The core library only handles the basics around secret fetching. If you need to
   access additional API endpoints, this library also provides a `Vault.request` 
-  method. This should allow you to tap into the full vault REST API, while still
+  method. This should allow you to tap into the complete vault REST API, while still
   benefiting from token control, JSON parsing, and other HTTP client nicities.
 
-  ## Usage
+  ## Setup and Usage
+
+  First, ensure that adapter dependancies are part of your dependancies and applications:
+
+  ```
+  def application do
+    [
+      extra_applications: [:logger, :tesla, :hackney,] # or :ibrowse
+      mod: {MyApp.Application, []}
+    ]
+  end
+
+  def deps do
+    [
+      # tesla, required for Vault.HTTP.Tesla
+      {:tesla, "~> 1.0.0", },
+
+      # pick your HTTP client - ibrowse, hackney, or if you're feeling bold, httpc.
+      {:ibrowse, "~> 4.4.0", },
+      {:hackney, "~> 1.6", },
+
+      # Pick your json parser
+      {:jason, ">= 1.0.0", },
+      {:poison, "~> 3.0", },
+    ]
+      
+  end
+  ```
+
+
 
   Example usage:
 
@@ -76,7 +129,7 @@ defmodule Vault do
 
   ```
     vault = 
-      Vault.new()
+      Vault.new() # use defaults, or application configuration
       |> Vault.set_auth(Vault.Auth.Approle)
       |> Vault.auth(%{role_id: "role_id", secret_id: "secret_id"})
 
@@ -90,9 +143,13 @@ defmodule Vault do
 
   require Logger
 
-  @http if Code.ensure_loaded?(Tesla), do: Vault.Http.Tesla, else: nil
+  @http if Code.ensure_loaded?(Tesla), do: Vault.HTTP.Tesla, else: nil
+  @json if Code.ensure_loaded?(Jason),
+          do: Jason,
+          else: if(Code.ensure_loaded?(Poison), do: Poison, else: nil)
 
   defstruct http: @http,
+            json: @json,
             host: nil,
             auth: nil,
             auth_path: nil,
@@ -102,10 +159,11 @@ defmodule Vault do
             credentials: %{}
 
   @type options :: map() | Keyword.t()
-  @type http :: Vault.Http.Adapter.t() | nil
+  @type http :: Vault.HTTP.Adapter.t() | nil
   @type auth :: Vault.Auth.Adapter.t() | nil
   @type auth_path :: String.t()
   @type engine :: Vault.Engine.Adapter.t() | nil
+  @type json :: Vault.Json.Adapter.t() | nil
   @type host :: String.t()
 
   @type token_expires_at :: NaiveDateTime.t()
@@ -117,6 +175,7 @@ defmodule Vault do
 
   @type t :: %__MODULE__{
           http: http,
+          json: json,
           host: host,
           auth: auth,
           auth_path: auth_path,
@@ -127,7 +186,8 @@ defmodule Vault do
         }
 
   @doc """
-  Create a new client. Optionally provide a keyword list or map of options for the initial configuration.
+  Create a new client. Optionally provide a keyword list or map of options for 
+  configuration.
 
   ## Examples
 
@@ -139,7 +199,7 @@ defmodule Vault do
   Return a fully initialized Vault Client:
   ```
     vault = Vault.new(%{
-      http: http,
+      http: Vault.HTTP.Tesla,
       host: myvault.instance.com,
       auth: Vault.Auth.JWT,
       auth_path: 'jwt',
@@ -152,18 +212,21 @@ defmodule Vault do
   ```
 
   ### Options
-  The following options can be provided.
+  The following options can be provided as part of the `:vault` application config, or 
+  as a Keyword List or Map of options. Runtime configuration will always take 
+  precedence.
 
   * `:auth` - Module for your Auth adapter.
   * `:auth_path` - Path to use for your auth adapter. Provided adapters have their own default paths. Check your adapter for details.
   * `:engine` Module for your Secret Engine adapter. Defaults to `Vault.Engine.Generic`.
   * `:host` - host of your vault instance. Should contain the port, if needed. Should not contain a trailing slash. Defaults to `System.get_env("VAULT_ADDR")`.
-  * `:http` - Module for your http adapter. Defaults to `Vault.Http.Tesla` when `:tesla` is present.
+  * `:http` - Module for your http adapter. Defaults to `Vault.HTTP.Tesla` when `:tesla` is present.
   * `:token` - A vault token.
   * `:token_expires_at` A `NaiveDateTime` instance that represents when the token expires, in utc.
   * `:credentials` - The credentials to use when authenticating with your Auth adapter.
 
   """
+
   @spec new(options) :: t
   def new(params \\ %{}) when is_list(params) or is_map(params) do
     params = Map.merge(%{host: System.get_env("VAULT_ADDR")}, Map.new(params))
@@ -364,8 +427,6 @@ defmodule Vault do
     engine.delete(vault, String.trim_leading(path, "/"), options)
   end
 
-  @methods [:get, :put, :post, :patch, :head, :delete]
-
   @doc """
   Make an HTTP request against your vault instance, with the current vault token. 
   This library doesn't cover every vault API, but this can help fill some of the
@@ -389,7 +450,7 @@ defmodule Vault do
 
   ```
   vault = Vault.new(
-    http: Vault.Http.Tesla, 
+    http: Vault.HTTP.Tesla, 
     host: "http://localhost", 
     token: "token"
     token_expires_in: NaiveDateTime.utc_now()
@@ -405,7 +466,7 @@ defmodule Vault do
   A quick example of renewing a lease.
   ```
   vault = Vault.new(
-    http: Vault.Http.Tesla, 
+    http: Vault.HTTP.Tesla, 
     host: "http://localhost", 
     token: "token"
     token_expires_in: NaiveDateTime.utc_now()
@@ -414,9 +475,9 @@ defmodule Vault do
   body = %{lease_id: lease, increment: increment}
   {:ok, response} = Vault.request(vault, request(:put, "sys/leases/renew", [body: body])
   ```
-
-
   """
+
+  @methods [:get, :put, :post, :patch, :head, :delete]
 
   @spec request(t, method, String.t(), list) :: {:ok, term} | {:error, list()}
   def request(vault, method, path, options \\ [])
@@ -430,15 +491,6 @@ defmodule Vault do
   def request(%__MODULE__{}, method, _path, _options) when method not in @methods,
     do: {:error, ["invalid method. Must be one of: #{inspect(@methods)}"]}
 
-  def request(%__MODULE__{http: http, token: token, host: host}, method, path, options) do
-    headers = Keyword.get(options, :headers, [])
-    headers = if token, do: [{"X-Vault-Token", token} | headers], else: headers
-    query_params = Keyword.get(options, :query_params, %{}) |> URI.encode_query()
-    body = Keyword.get(options, :body, %{})
-    version = Keyword.get(options, :version, "v1")
-    path = String.trim_leading(path, "/")
-    url = "#{host}/#{version}/#{path}?#{query_params}" |> String.trim_trailing("?")
-
-    http.request(method, url, body, headers)
-  end
+  def request(%__MODULE__{} = vault, method, path, options),
+    do: Vault.HTTP.request(vault, method, path, options)
 end

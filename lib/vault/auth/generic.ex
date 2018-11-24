@@ -53,7 +53,7 @@ defmodule Vault.Auth.Generic do
   vault = 
     Vault.new([
       auth: Vault.Auth.Generic,
-      http: Vault.Http.Tesla,
+      http: Vault.HTTP.Tesla,
       engine: Vault.KVV2
     ])
 
@@ -71,7 +71,7 @@ defmodule Vault.Auth.Generic do
   vault = 
     Vault.new([
       auth: Vault.Auth.Generic,
-      http: Vault.Http.Tesla,
+      http: Vault.HTTP.Tesla,
       engine: Vault.KVV2
     ])
 
@@ -95,7 +95,7 @@ defmodule Vault.Auth.Generic do
   @spec login(Vault.t(), params) :: Vault.Auth.Adapter.response()
   def login(vault, params)
 
-  def login(%Vault{http: http, host: host}, %{request: request} = params) do
+  def login(%Vault{} = vault, %{request: request} = params) do
     request = Map.merge(%{method: :post, body: %{}}, request)
 
     response = Map.merge(@default_response, Map.get(params, :response, %{}))
@@ -104,10 +104,11 @@ defmodule Vault.Auth.Generic do
       {"Content-Type", "application/json"}
     ]
 
-    url = host <> "/v1/auth/#{request.path}"
+    url = "auth/#{request.path}"
 
-    with {:ok, %{body: body}} <- http.request(request.method, url, request.body, headers) do
-      case body do
+    with {:ok, http_response} <-
+           Vault.HTTP.request(vault, request.method, url, body: request.body, headers: headers) do
+      case http_response do
         %{"errors" => []} ->
           {:error, ["Key not found"]}
 

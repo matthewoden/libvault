@@ -36,7 +36,7 @@ defmodule Vault.MixProject do
 
       # json parsers
       {:jason, ">= 1.0.0", optional: true},
-
+      {:poison, "~> 3.0", optional: true},
       # testing
       {:bypass, "~> 0.8", only: :test},
       {:plug_cowboy, "~> 1.0", only: :test},

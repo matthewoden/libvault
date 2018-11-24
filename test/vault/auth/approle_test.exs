@@ -23,7 +23,7 @@ defmodule Vault.Auth.ApproleTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Approle,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -47,7 +47,7 @@ defmodule Vault.Auth.ApproleTest do
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Approle,
         auth_path: "approler-derby",
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -67,7 +67,7 @@ defmodule Vault.Auth.ApproleTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Approle,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -85,7 +85,7 @@ defmodule Vault.Auth.ApproleTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Approle,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -97,7 +97,7 @@ defmodule Vault.Auth.ApproleTest do
       Vault.new(
         host: "http://localhost",
         auth: Vault.Auth.Approle,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(%{secret_id: "secret_id"})
 
@@ -109,7 +109,7 @@ defmodule Vault.Auth.ApproleTest do
       Vault.new(
         host: "http://localhost",
         auth: Vault.Auth.Approle,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(%{role_id: "role_id"})
 

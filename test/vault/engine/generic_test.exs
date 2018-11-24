@@ -6,7 +6,7 @@ defmodule Vault.Engine.GenericTest do
       host: "http://127.0.0.1:8200",
       auth: Vault.Auth.Token,
       engine: Vault.Engine.Generic,
-      http: Vault.Http.Tesla,
+      http: Vault.HTTP.Tesla,
       token: token || "root",
       token_expires_in: NaiveDateTime.utc_now() |> NaiveDateTime.add(2000, :seconds)
     )
@@ -40,14 +40,14 @@ defmodule Vault.Engine.GenericTest do
   end
 
   test "Generic Engine can list from the cubbyhole" do
-    assert {:ok, %{"keys" => ["dlrow", "world", "world/"]}} == Vault.list(client(), "cubbyhole/hello")
+    assert {:ok, %{"keys" => ["dlrow", "world", "world/"]}} ==
+             Vault.list(client(), "cubbyhole/hello")
   end
 
   test "Generic Engine can delete from the cubbyhole" do
     {:ok, %{"bar" => "foo"}} = Vault.read(client(), "cubbyhole/to/delete")
     assert {:ok, %{}} == Vault.delete(client(), "cubbyhole/to/delete")
     {:error, ["Key not found"]} = Vault.read(client(), "cubbyhole/to/delete")
-
   end
 
   test "Generic Engine can read/write to/from ssh" do

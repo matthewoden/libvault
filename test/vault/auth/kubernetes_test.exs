@@ -39,7 +39,7 @@ defmodule Vault.Auth.KubernetesTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Kubernetes,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -67,7 +67,7 @@ defmodule Vault.Auth.KubernetesTest do
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Kubernetes,
         auth_path: "k8s",
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -87,7 +87,7 @@ defmodule Vault.Auth.KubernetesTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Kubernetes,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -105,7 +105,7 @@ defmodule Vault.Auth.KubernetesTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Kubernetes,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -117,7 +117,7 @@ defmodule Vault.Auth.KubernetesTest do
       Vault.new(
         host: "http://localhost",
         auth: Vault.Auth.Kubernetes,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(%{jwt: "present"})
 
@@ -129,7 +129,7 @@ defmodule Vault.Auth.KubernetesTest do
       Vault.new(
         host: "http://localhost",
         auth: Vault.Auth.Kubernetes,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(%{role: "role"})
 

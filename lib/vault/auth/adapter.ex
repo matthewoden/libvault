@@ -20,17 +20,18 @@ defmodule Vault.Auth.Adapter do
     @behaviour Vault.Auth.Adapter
     @impl true
 
-    def login(%Vault{http: http, host: host}, %{username: _, password: _} = params) do
+    def login(%Vault{} = vault, %{username: _, password: _} = params) do
 
       headers = [
         {"Content-Type", "application/json"},
         {"Accept", "application/json"}
       ]
 
-      url = host <> "/v1/auth/MY_NEW_AUTH/login"
+      url = "auth/MY_NEW_AUTH/login"
 
-      with {:ok, %{body: body}} <- http.request(:post, url, params, headers) do
-        case body do
+      request_options =  [body: %{ password: password }, headers: headers]
+      with {:ok, response} <- Vault.HTTP.request(vault,:post, url, request_options) do
+        case response do
           %{"errors" => messages} ->
             {:error, messages}
 

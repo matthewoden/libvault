@@ -23,7 +23,7 @@ defmodule Vault.Engine.Generic do
         host: System.get_env("VAULT_ADDR"),
         auth: Vault.Auth.Token,
         engine: Vault.Engine.Generic,
-        http: Vault.Http.Tesla,
+        http: Vault.HTTP.Tesla,
       ) |> Vault.auth(%{token: "token"})
 
   Read/Write from the cubbyhole secret engine.
@@ -118,19 +118,21 @@ defmodule Vault.Engine.Generic do
   @impl true
   def delete(vault, path, options \\ []) do
     options = Keyword.merge([method: :delete], options)
-    request(vault, path, %{}, options)
+    request(vault, path, nil, options)
   end
 
-  defp request(%Vault{http: http, host: host, token: token}, path, value, options) do
-    headers = if token, do: [{"X-Vault-Token", token}], else: []
+  defp request(client, path, value, options) do
     method = Keyword.get(options, :method, :post)
+    body = Keyword.get(options, :body, value)
+    query_params = Keyword.get(options, :query_params, [])
     full_response = Keyword.get(options, :full_response, false)
-    query_params = Keyword.get(options, :query_params, %{})
-    payload = Keyword.get(options, :body, value)
-    url = host <> "/v1/" <> path <> parse_params(query_params)
 
-    with {:ok, %{body: body} = request} <- http.request(method, url, payload, headers) do
+    with {:ok, body} <-
+           Vault.HTTP.request(client, method, path, body: body, query_params: query_params) do
       case body do
+        nil ->
+          {:ok, %{}}
+
         "" ->
           {:ok, %{}}
 
@@ -146,19 +148,12 @@ defmodule Vault.Engine.Generic do
         %{"data" => data} ->
           {:ok, data}
 
-        _otherwise ->
-          {:error, ["Unknown response from vault", inspect(request)]}
+        otherwise ->
+          {:error, ["Unknown response from vault", inspect(otherwise)]}
       end
     else
       {:error, reason} ->
         {:error, ["Http Adapter error", inspect(reason)]}
-    end
-  end
-
-  defp parse_params(params) do
-    case URI.encode_query(params) do
-      "" -> ""
-      query_params -> "?" <> query_params
     end
   end
 end

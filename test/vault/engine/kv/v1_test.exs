@@ -6,7 +6,7 @@ defmodule Vault.Engine.KVV1Test do
       host: "http://127.0.0.1:8200",
       auth: Vault.Auth.Token,
       engine: Vault.Engine.KVV1,
-      http: Vault.Http.Tesla,
+      http: Vault.HTTP.Tesla,
       # local dev root token
       token: token || "root",
       token_expires_in: NaiveDateTime.utc_now() |> NaiveDateTime.add(2000, :seconds)

@@ -44,7 +44,7 @@ defmodule Vault.Auth.GoogleCloudTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.GoogleCloud,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -72,7 +72,7 @@ defmodule Vault.Auth.GoogleCloudTest do
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.GoogleCloud,
         auth_path: "google",
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -92,7 +92,7 @@ defmodule Vault.Auth.GoogleCloudTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.GoogleCloud,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -110,7 +110,7 @@ defmodule Vault.Auth.GoogleCloudTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.GoogleCloud,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -122,7 +122,7 @@ defmodule Vault.Auth.GoogleCloudTest do
       Vault.new(
         host: "http://localhost",
         auth: Vault.Auth.GoogleCloud,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(%{jwt: "present"})
 
@@ -134,7 +134,7 @@ defmodule Vault.Auth.GoogleCloudTest do
       Vault.new(
         host: "http://localhost",
         auth: Vault.Auth.GoogleCloud,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(%{role: "role"})
 

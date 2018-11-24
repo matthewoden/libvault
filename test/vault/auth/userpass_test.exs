@@ -23,7 +23,7 @@ defmodule Vault.Auth.UserPassTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.UserPass,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -47,7 +47,7 @@ defmodule Vault.Auth.UserPassTest do
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.UserPass,
         auth_path: "loserpass",
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -67,7 +67,7 @@ defmodule Vault.Auth.UserPassTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.UserPass,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -85,7 +85,7 @@ defmodule Vault.Auth.UserPassTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.UserPass,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -133,7 +133,7 @@ defmodule Vault.Auth.UserPassTest do
       Vault.new(
         host: "http://localhost:8200",
         auth: Vault.Auth.UserPass,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(%{username: "tester", password: "foo"})
 

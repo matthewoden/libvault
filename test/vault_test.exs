@@ -3,14 +3,14 @@ defmodule VaultTest do
 
   test "new() creates a vault from a map" do
     config = %{
-      http: Vault.Http.Tesla,
+      http: Vault.HTTP.Tesla,
       engine: Vault.Engine.KVV1,
       auth: Vault.Auth.Token,
       credentials: %{token: "test"}
     }
 
     assert Vault.new(config) == %Vault{
-             http: Vault.Http.Tesla,
+             http: Vault.HTTP.Tesla,
              engine: Vault.Engine.KVV1,
              auth: Vault.Auth.Token,
              credentials: %{token: "test"},
@@ -22,14 +22,14 @@ defmodule VaultTest do
 
   test "new() creates a vault from a keyword list" do
     config = [
-      http: Vault.Http.Tesla,
+      http: Vault.HTTP.Tesla,
       engine: Vault.Engine.KVV1,
       auth: Vault.Auth.Token,
       credentials: %{token: "test"}
     ]
 
     assert Vault.new(config) == %Vault{
-             http: Vault.Http.Tesla,
+             http: Vault.HTTP.Tesla,
              engine: Vault.Engine.KVV1,
              auth: Vault.Auth.Token,
              credentials: %{token: "test"},
@@ -167,12 +167,12 @@ defmodule VaultTest do
   end
 
   test "returns a { :error, reason } if the host is not defined" do
-    vault = Vault.new(http: Vault.Http.Tesla, host: nil)
+    vault = Vault.new(http: Vault.HTTP.Tesla, host: nil)
     assert {:error, ["host not set."]} == Vault.request(vault, :post, "path/to/call", [])
   end
 
   test "returns a { :error, reason } if using an unsupported method" do
-    vault = Vault.new(http: Vault.Http.Tesla, host: "http://localhost")
+    vault = Vault.new(http: Vault.HTTP.Tesla, host: "http://localhost")
 
     assert {:error,
             ["invalid method. Must be one of: [:get, :put, :post, :patch, :head, :delete]"]} =
@@ -184,10 +184,10 @@ defmodule VaultTest do
 
     assert {:ok,
             %{
-              "method" => :get,
-              "headers" => [{"X-Vault-Token", "token"}],
+              "method" => "get",
+              "headers" => %{"X-Vault-Token" => "token"},
               "path" => "http://localhost/v1/path/to/call",
-              "body" => %{}
+              "body" => "{}"
             }} == Vault.request(vault, :get, "path/to/call", [])
   end
 
@@ -197,10 +197,10 @@ defmodule VaultTest do
 
     assert {:ok,
             %{
-              "method" => :get,
-              "headers" => [{"X-Vault-Token", "token"}, {"X-Forwarded-For", "http://localhost"}],
+              "method" => "get",
+              "headers" => %{"X-Vault-Token" => "token", "X-Forwarded-For" => "http://localhost"},
               "path" => "http://localhost/v1/path/to/call",
-              "body" => %{}
+              "body" => "{}"
             }} == Vault.request(vault, :get, "path/to/call", headers: headers)
   end
 
@@ -210,10 +210,10 @@ defmodule VaultTest do
 
     assert {:ok,
             %{
-              "method" => :get,
-              "headers" => [{"X-Vault-Token", "token"}],
+              "method" => "get",
+              "headers" => %{"X-Vault-Token" => "token"},
               "path" => "http://localhost/v1/path/to/call?cas=0",
-              "body" => %{}
+              "body" => "{}"
             }} == Vault.request(vault, :get, "path/to/call", query_params: query_params)
   end
 
@@ -222,10 +222,10 @@ defmodule VaultTest do
 
     assert {:ok,
             %{
-              "method" => :get,
-              "headers" => [{"X-Vault-Token", "token"}],
+              "method" => "get",
+              "headers" => %{"X-Vault-Token" => "token"},
               "path" => "http://localhost/v3/path/to/call",
-              "body" => %{}
+              "body" => "{}"
             }} == Vault.request(vault, :get, "path/to/call", version: "v3")
   end
 
@@ -234,10 +234,10 @@ defmodule VaultTest do
 
     assert {:ok,
             %{
-              "method" => :get,
-              "headers" => [{"X-Vault-Token", "token"}],
+              "method" => "get",
+              "headers" => %{"X-Vault-Token" => "token"},
               "path" => "http://localhost/v1/path/to/call",
-              "body" => %{"foo" => "bar"}
+              "body" => "{\"foo\":\"bar\"}"
             }} == Vault.request(vault, :get, "path/to/call", body: %{"foo" => "bar"})
   end
 end

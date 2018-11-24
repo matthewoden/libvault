@@ -3,14 +3,19 @@ defmodule Vault.Http.Test do
   Test HTTP Adapter for Vault.Http calls.
   """
 
-  @behaviour Vault.Http.Adapter
+  @behaviour Vault.HTTP.Adapter
 
   @impl true
-  def request(:post, "http://localhost/v1/auth/approle/login", %{role_id: "error"}, _headers) do
+  def request(
+        :post,
+        "http://localhost/v1/auth/approle/login",
+        ~s<{"role_id":"error","secret_id":"secret_id"}>,
+        _headers
+      ) do
     {:error, "Adapter Error"}
   end
 
-  def request(:post, "http://localhost/v1/auth/github/login", %{token: "error"}, _headers) do
+  def request(:post, "http://localhost/v1/auth/github/login", ~s<{"token":"error"}>, _headers) do
     {:error, "Adapter Error"}
   end
 
@@ -20,18 +25,23 @@ defmodule Vault.Http.Test do
     {:error, "Adapter Error"}
   end
 
-  def request(:post, "http://localhost/v1/auth/ldap/" <> _rest, %{password: "error"}, _headers) do
+  def request(
+        :post,
+        "http://localhost/v1/auth/ldap/" <> _rest,
+        ~s<{"password":"error"}>,
+        _headers
+      ) do
     {:error, "Adapter Error"}
   end
 
-  def request(:post, "http://localhost/v1/auth/userpass/" <> _rest, %{password: "error"}, _) do
+  def request(:post, "http://localhost/v1/auth/userpass/" <> _rest, ~s<{"password":"error"}>, _) do
     {:error, "Adapter Error"}
   end
 
   def request(
         :post,
         "http://localhost/v1/auth/azure/login" <> _rest,
-        %{role: "error", jwt: "error"},
+        ~s<{"jwt":"error","role":"error"}>,
         _
       ) do
     {:error, "Adapter Error"}
@@ -40,7 +50,7 @@ defmodule Vault.Http.Test do
   def request(
         :post,
         "http://localhost/v1/auth/gcp/login" <> _rest,
-        %{role: "error", jwt: "error"},
+        ~s<{"jwt":"error","role":"error"}>,
         _
       ) do
     {:error, "Adapter Error"}
@@ -49,7 +59,7 @@ defmodule Vault.Http.Test do
   def request(
         :post,
         "http://localhost/v1/auth/jwt/login" <> _rest,
-        %{role: "error", jwt: "error"},
+        ~s<{"jwt":"error","role":"error"}>,
         _
       ) do
     {:error, "Adapter Error"}
@@ -58,13 +68,14 @@ defmodule Vault.Http.Test do
   def request(
         :post,
         "http://localhost/v1/auth/kubernetes/login" <> _rest,
-        %{role: "error", jwt: "error"},
+        ~s<{"jwt":"error","role":"error"}>,
         _
       ) do
     {:error, "Adapter Error"}
   end
 
   def request(method, path, body, headers) do
-    {:ok, %{"method" => method, "path" => path, "body" => body, "headers" => headers}}
+    resp = Jason.encode!(%{method: method, path: path, body: body, headers: Map.new(headers)})
+    {:ok, %{body: resp}}
   end
 end

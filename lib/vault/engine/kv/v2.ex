@@ -235,33 +235,4 @@ defmodule Vault.Engine.KVV2 do
       version -> "?version=#{version}"
     end
   end
-
-  # defp v2_url(host, path) do
-  #   host <> "/v1/" <> v2_path(path)
-  # end
-
-  # def write(%{http: http, host: host, token: token}, path, value, options \\ []) do
-  #   full_response = Keyword.get(options, :full_response, false)
-
-  #   payload =
-  #     if cas = Keyword.get(options, :cas, false),
-  #       do: %{data: value, options: %{cas: cas}},
-  #       else: %{data: value}
-
-  #   with {:ok, %{body: body}} <- http.request(:post, v2_url(host, path), payload, headers(token)) do
-  #     case body do
-  #       %{"errors" => messages} ->
-  #         {:error, messages}
-
-  #       %{} = data when full_response == true ->
-  #         {:ok, data}
-
-  #       %{"data" => data} ->
-  #         {:ok, data}
-  #     end
-  #   else
-  #     {:error, reason} ->
-  #       {:error, ["Http Adapter error", reason]}
-  #   end
-  # end
 end

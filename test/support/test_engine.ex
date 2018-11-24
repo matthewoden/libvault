@@ -22,7 +22,6 @@ defmodule Vault.Engine.Test do
     end
   end
 
-
   def write(_vault, path, _value, []) do
     case path do
       "secret/with/permission" ->

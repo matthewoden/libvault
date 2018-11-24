@@ -21,17 +21,15 @@ defmodule Vault.Auth.Token do
   @impl true
   def login(vault, params)
 
-  def login(%Vault{http: http, host: host}, %{token: token}) do
-    payload = %{}
-
+  def login(%Vault{} = vault, %{token: token}) do
     headers = [
       {"X-Vault-Token", token},
       {"Content-Type", "application/json"}
     ]
 
-    url = host <> "/v1/auth/token/lookup-self"
+    url = "auth/token/lookup-self"
 
-    with {:ok, %{body: body}} <- http.request(:get, url, payload, headers) do
+    with {:ok, body} <- Vault.HTTP.get(vault, url, headers: headers) do
       case body do
         %{"errors" => messages} ->
           {:error, messages}

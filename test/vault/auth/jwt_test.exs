@@ -39,7 +39,7 @@ defmodule Vault.Auth.JWTTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.JWT,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -67,7 +67,7 @@ defmodule Vault.Auth.JWTTest do
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.JWT,
         auth_path: "justwebtokens",
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -87,7 +87,7 @@ defmodule Vault.Auth.JWTTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.JWT,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -105,7 +105,7 @@ defmodule Vault.Auth.JWTTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.JWT,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -117,7 +117,7 @@ defmodule Vault.Auth.JWTTest do
       Vault.new(
         host: "http://localhost",
         auth: Vault.Auth.JWT,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(%{jwt: "present"})
 
@@ -129,7 +129,7 @@ defmodule Vault.Auth.JWTTest do
       Vault.new(
         host: "http://localhost",
         auth: Vault.Auth.JWT,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(%{role: "role"})
 

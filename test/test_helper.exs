@@ -1,4 +1,6 @@
 ExUnit.start()
 Application.ensure_all_started(:bypass)
 Application.ensure_all_started(:hackney)
+Application.ensure_all_started(:ibrowse)
+Application.put_env(:tesla, :adapter, Enum.random([Tesla.Adapter.Hackney, Tesla.Adapter.Ibrowse]))
 Application.ensure_all_started(:tesla)

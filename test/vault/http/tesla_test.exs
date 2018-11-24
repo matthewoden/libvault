@@ -1,7 +1,7 @@
-defmodule Vault.Http.Tesla.Test do
+defmodule Vault.HTTP.Tesla.Test do
   use ExUnit.Case, async: true
 
-  alias Vault.Http.Tesla, as: Http
+  alias Vault.HTTP.Tesla, as: Http
 
   setup do
     bypass = Bypass.open()
@@ -17,7 +17,7 @@ defmodule Vault.Http.Tesla.Test do
     end)
 
     assert {:ok, %{body: ~s<{"ok": true}>}} =
-             Http.request(:get, "http://localhost:#{bypass.port}/", %{}, [{"test", true}])
+             Http.request(:get, "http://localhost:#{bypass.port}/", nil, [{"test", true}])
   end
 
   test "can make a PUT request", %{bypass: bypass} do
@@ -32,9 +32,14 @@ defmodule Vault.Http.Tesla.Test do
     end)
 
     assert {:ok, %{body: ~s<{"ok": true}>}} =
-             Http.request(:put, "http://localhost:#{bypass.port}/", %{payload: "value"}, [
-               {"test", true}
-             ])
+             Http.request(
+               :put,
+               "http://localhost:#{bypass.port}/",
+               Jason.encode!(%{payload: "value"}),
+               [
+                 {"test", true}
+               ]
+             )
   end
 
   test "can make a POST request", %{bypass: bypass} do
@@ -49,9 +54,14 @@ defmodule Vault.Http.Tesla.Test do
     end)
 
     assert {:ok, %{body: ~s<{"ok": true}>}} =
-             Http.request(:post, "http://localhost:#{bypass.port}/", %{payload: "value"}, [
-               {"test", true}
-             ])
+             Http.request(
+               :post,
+               "http://localhost:#{bypass.port}/",
+               Jason.encode!(%{payload: "value"}),
+               [
+                 {"test", true}
+               ]
+             )
   end
 
   test "can make a PATCH request", %{bypass: bypass} do
@@ -66,9 +76,14 @@ defmodule Vault.Http.Tesla.Test do
     end)
 
     assert {:ok, %{body: ~s<{"ok": true}>}} =
-             Http.request(:patch, "http://localhost:#{bypass.port}/", %{payload: "value"}, [
-               {"test", true}
-             ])
+             Http.request(
+               :patch,
+               "http://localhost:#{bypass.port}/",
+               Jason.encode!(%{payload: "value"}),
+               [
+                 {"test", true}
+               ]
+             )
   end
 
   test "can make a DELETE request", %{bypass: bypass} do
@@ -80,7 +95,7 @@ defmodule Vault.Http.Tesla.Test do
     end)
 
     assert {:ok, %{body: ~s<{"ok": true}>}} =
-             Http.request(:delete, "http://localhost:#{bypass.port}/", %{}, [{"test", true}])
+             Http.request(:delete, "http://localhost:#{bypass.port}/", nil, [{"test", true}])
   end
 
   test "can make a HEAD request", %{bypass: bypass} do
@@ -93,13 +108,13 @@ defmodule Vault.Http.Tesla.Test do
     end)
 
     assert {:ok, %{body: ""}} =
-             Http.request(:head, "http://localhost:#{bypass.port}/", %{}, [{"test", true}])
+             Http.request(:head, "http://localhost:#{bypass.port}/", nil, [{"test", true}])
   end
 
   test "Can handle redirects", %{bypass: bypass} do
     Bypass.expect_once(bypass, "GET", "/", fn conn ->
       Plug.Conn.put_resp_header(conn, "location", "/redirect")
-      |> Plug.Conn.resp(307, "Redirecting...")
+      |> Plug.Conn.resp(307, "Redirecting")
     end)
 
     Bypass.expect_once(bypass, "GET", "/redirect", fn conn ->
@@ -107,6 +122,8 @@ defmodule Vault.Http.Tesla.Test do
     end)
 
     assert {:ok, %{body: ~s<{"ok": true}>}} =
-             Http.request(:get, "http://localhost:#{bypass.port}/", %{}, [])
+             Http.request(:get, "http://localhost:#{bypass.port}/", nil, [
+               {"accept", "applictation/json"}
+             ])
   end
 end

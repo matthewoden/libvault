@@ -22,10 +22,10 @@ defmodule Vault.Auth.GoogleCloud do
   def login(%Vault{auth_path: nil} = vault, params),
     do: Vault.set_auth_path(vault, "gcp") |> login(params)
 
-  def login(%Vault{http: http, host: host, auth_path: path}, params) do
+  def login(%Vault{auth_path: path} = vault, params) do
     with {:ok, params} <- validate_params(params),
-         {:ok, %{body: body}} <- http.request(:post, url(host, path), params, headers()) do
-      case body do
+         {:ok, response} <- Vault.HTTP.post(vault, url(path), body: params, headers: headers()) do
+      case response do
         %{"errors" => messages} ->
           {:error, messages}
 
@@ -53,8 +53,8 @@ defmodule Vault.Auth.GoogleCloud do
     {:error, :invalid_credentials}
   end
 
-  defp url(host, path) do
-    host <> "/v1/auth/" <> path <> "/login"
+  defp url(path) do
+    "auth/" <> path <> "/login"
   end
 
   defp headers() do

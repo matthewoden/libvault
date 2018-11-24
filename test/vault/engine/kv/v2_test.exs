@@ -6,7 +6,7 @@ defmodule Vault.Engine.KVV2Test do
       host: "http://127.0.0.1:8200",
       auth: Vault.Auth.Token,
       engine: Vault.Engine.KVV2,
-      http: Vault.Http.Tesla,
+      http: Vault.HTTP.Tesla,
       # local dev root token
       token: token || "root",
       token_expires_in: NaiveDateTime.utc_now() |> NaiveDateTime.add(2000, :seconds)
@@ -43,11 +43,17 @@ defmodule Vault.Engine.KVV2Test do
     value_1 = String.codepoints("some long value") |> Enum.shuffle() |> Enum.join()
     value_2 = String.codepoints("some long value") |> Enum.shuffle() |> Enum.join()
 
-    {:ok, %{"version" => version_1 }} = Vault.write(client(), "secret/write/version", %{"foo" => value_1})
-    {:ok, %{"version" => version_2 }} = Vault.write(client(), "secret/write/version", %{"foo" => value_2})
+    {:ok, %{"version" => version_1}} =
+      Vault.write(client(), "secret/write/version", %{"foo" => value_1})
 
-    assert {:ok, %{"foo" => value_1}} == Vault.read(client(), "secret/write/version", version: version_1)
-    assert {:ok, %{"foo" => value_2}} == Vault.read(client(), "secret/write/version", version: version_2)
+    {:ok, %{"version" => version_2}} =
+      Vault.write(client(), "secret/write/version", %{"foo" => value_2})
+
+    assert {:ok, %{"foo" => value_1}} ==
+             Vault.read(client(), "secret/write/version", version: version_1)
+
+    assert {:ok, %{"foo" => value_2}} ==
+             Vault.read(client(), "secret/write/version", version: version_2)
   end
 
   test "kvv2 write returns an error if token is invalid" do
@@ -75,7 +81,8 @@ defmodule Vault.Engine.KVV2Test do
   end
 
   test "kvv2 delete version returns an error if a version isn't specified" do
-    {:error, ["A list of versions is required"]} = Vault.delete(client(), "secret/write/to/delete")
+    {:error, ["A list of versions is required"]} =
+      Vault.delete(client(), "secret/write/to/delete")
   end
 
   test "kvv2 destroy version" do
@@ -95,6 +102,7 @@ defmodule Vault.Engine.KVV2Test do
   end
 
   test "kvv2 destroy version returns an error if a version isn't specified" do
-    {:error, ["A list of versions is required"]} = Vault.delete(client(), "secret/write/to/delete", destroy: true)
+    {:error, ["A list of versions is required"]} =
+      Vault.delete(client(), "secret/write/to/delete", destroy: true)
   end
 end

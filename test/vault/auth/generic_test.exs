@@ -32,7 +32,7 @@ defmodule Vault.Auth.GenericTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Generic,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -52,7 +52,7 @@ defmodule Vault.Auth.GenericTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Generic,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -70,7 +70,7 @@ defmodule Vault.Auth.GenericTest do
       Vault.new(
         host: "http://localhost:#{bypass.port}",
         auth: Vault.Auth.Generic,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(@credentials)
 
@@ -103,7 +103,7 @@ defmodule Vault.Auth.GenericTest do
       Vault.new(
         host: "http://localhost:8200",
         auth: Vault.Auth.Generic,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(%{
         request: %{
@@ -125,7 +125,7 @@ defmodule Vault.Auth.GenericTest do
       Vault.new(
         host: "http://localhost:8200",
         auth: Vault.Auth.Generic,
-        http: Vault.Http.Tesla
+        http: Vault.HTTP.Tesla
       )
       |> Vault.auth(%{
         request: %{

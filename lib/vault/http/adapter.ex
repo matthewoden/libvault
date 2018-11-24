@@ -1,4 +1,4 @@
-defmodule Vault.Http.Adapter do
+defmodule Vault.HTTP.Adapter do
   @moduledoc """
   Adapter interface for making Vault HTTP.
 
@@ -14,7 +14,7 @@ defmodule Vault.Http.Adapter do
   @type response :: %{
           headers: list,
           status: integer,
-          body: map | list | nil
+          body: String.t()
         }
 
   @callback request(method, url, params, headers) :: {:ok, response} | {:error, term}

@@ -22,12 +22,12 @@ defmodule Vault.Auth.UserPass do
   def login(%Vault{auth_path: nil} = vault, params),
     do: Vault.set_auth_path(vault, "userpass") |> login(params)
 
-  def login(%Vault{http: http, host: host, auth_path: path}, params) do
+  def login(%Vault{auth_path: path} = vault, params) do
     with {:ok, params} <- validate_params(params),
          payload <- %{password: params.password},
-         url <- url(host, path, params.username),
-         {:ok, %{body: body}} <- http.request(:post, url, payload, headers()) do
-      case body do
+         url <- url(path, params.username),
+         {:ok, response} <- Vault.HTTP.post(vault, url, body: payload, headers: headers()) do
+      case response do
         %{"errors" => messages} ->
           {:error, messages}
 
@@ -55,8 +55,8 @@ defmodule Vault.Auth.UserPass do
     {:error, :invalid_credentials}
   end
 
-  defp url(host, path, username) do
-    host <> "/v1/auth/" <> path <> "/login/" <> username
+  defp url(path, username) do
+    "auth/" <> path <> "/login/" <> username
   end
 
   defp headers() do

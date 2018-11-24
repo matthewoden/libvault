@@ -8,6 +8,21 @@ When possible, it tries to emulate the CLI, with `read`, `write`, `list` and
 `delete` and `auth` methods. An additional `request` method is provided when you need
 further flexibility with the API.
 
+## API Preview
+
+```elixir
+{:ok, vault } =
+  Vault.new([
+    engine: Vault.Engine.KVV2,
+    auth: Vault.Auth.UserPass
+  ])
+  |> Vault.auth(%{username: "username", password: "password"})
+
+{:ok, db_pass} = Vault.read(vault, "secret/path/to/password")
+
+{:ok, %{"version" => 1 }} = Vault.write(vault, "secret/path/to/creds", %{secret: "secrets!"})
+```
+
 ## Configuration / Adapters
 
 Hashicorp's Vault is highly configurable. Rather than cover every possible option,
@@ -15,14 +30,23 @@ this library strives to be flexible and adaptable. Auth backends, Secret
 Engines, and Http clients are all replacable, and each behaviour asks for a
 minimal contract.
 
-## Http Adapters
+## HTTP Adapters
 
-The following http Adapters are provided:
+The following HTTP Adapters are provided:
 
-- `Tesla` with `Vault.Http.Tesla`
-  - Can be configured to use `:hackney`, `:ibrowse`, or `:httpc`
+- `Tesla` with `Vault.HTTP.Tesla`
+  - Can be configured to use `:hackney`, `:ibrowse`, or `:httpc` (and in turn, plays nice with `HTTPoison`, and `HTTPotion`)
 
 Be sure to add applications and dependancies to your mixfile as needed.
+
+### JSON Adapters
+
+Most JSON libraries provide the same methods, so no default adapter is needed.
+You can use `Jason`, `JSX`, `Poison`, or whatever encoder you want.
+
+Defaults to `Jason` or `Poison` if present.
+
+See `Vault.JSON.Adapter` for the full behaviour interface.
 
 ## Auth Adapters
 
@@ -54,22 +78,56 @@ its own adapter:
   - [v1](https://www.vaultproject.io/api/secret/kv/kv-v1.html) with `Vault.Engine.KVV1`
   - [v2](https://www.vaultproject.io/api/secret/kv/kv-v2.html) with `Vault.Engine.KVV2`
 
-## Request Flexibility
+### Additional request methods
 
 The core library only handles the basics around secret fetching. If you need to
 access additional API endpoints, this library also provides a `Vault.request`
-method. This should allow you to tap into the full vault REST API, while still
+method. This should allow you to tap into the complete vault REST API, while still
 benefiting from token control, JSON parsing, and other HTTP client nicities.
 
-## Usage Example
+## Setup and Usage
 
-Example usage:
+### Setup
 
+Ensure that any adapter dependancies have been included as part of your application's
+dependancies and extra_applications:
+
+```elixir
+  def application do
+    [
+      extra_applications: [:logger, :hackney, :tesla,] # or :ibrowse
+      mod: {MyApp.Application, []}
+    ]
+  end
+
+  def deps do
+    [
+      # libvault (required#)
+      {:libvault, "~> 0.1.0"},
+
+      # tesla, required for Vault.HTTP.Tesla
+      {:tesla, "~> 1.0.0", },
+
+      # pick your HTTP client - ibrowse, hackney, or if you're feeling bold, :httpc.
+      {:ibrowse, "~> 4.4.0", },
+      {:hackney, "~> 1.6", },
+
+      # Pick your json parser
+      {:jason, ">= 1.0.0", },
+      {:poison, "~> 3.0", },
+    ]
+
+  end
 ```
+
+### Usage
+
+```elixir
 vault =
   Vault.new([
     engine: Vault.Engine.KVV2,
     auth: Vault.Auth.UserPass,
+    json: Jason,
     credentials: %{username: "username", password: "password"}
   ])
   |> Vault.auth()
@@ -80,7 +138,7 @@ vault =
 
 You can configure the vault client up front, or change configuration on the fly.
 
-```
+```elixir
   vault =
     Vault.new()
     |> Vault.set_auth(Vault.Auth.Approle)
@@ -93,6 +151,8 @@ You can configure the vault client up front, or change configuration on the fly.
 
   {:ok, db_pass} = Vault.write(vault, "kv/path/to/password", %{ password: "db_pass" })
 ```
+
+See the full `Vault` client for additional methods.
 
 ## Testing Locally
 
