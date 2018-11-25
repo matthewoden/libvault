@@ -48,6 +48,40 @@ defmodule Vault.Auth.JWTTest do
     assert client.credentials == @credentials
   end
 
+  test "JWT login with string-map credentials", %{bypass: bypass} do
+    Bypass.expect_once(bypass, "POST", "/v1/auth/azure/login", fn conn ->
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+      assert Jason.decode!(body) == %{
+               "role" => "valid-role",
+               "jwt" => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+             }
+
+      response = @valid_response
+
+      conn
+      |> Plug.Conn.put_resp_content_type("application/json")
+      |> Plug.Conn.resp(200, Jason.encode!(response))
+    end)
+
+    string_credentials = %{
+      "role" => "valid-role",
+      "jwt" => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+    }
+
+    {:ok, client} =
+      Vault.new(
+        host: "http://localhost:#{bypass.port}",
+        auth: Vault.Auth.Azure,
+        http: Vault.HTTP.Tesla
+      )
+      |> Vault.auth(string_credentials)
+
+    assert Vault.token_expired?(client) == false
+    assert client.token == "valid_token"
+    assert client.credentials == string_credentials
+  end
+
   test "JWT login with custom path", %{bypass: bypass} do
     Bypass.expect_once(bypass, "POST", "/v1/auth/justwebtokens/login", fn conn ->
       {:ok, body, conn} = Plug.Conn.read_body(conn)

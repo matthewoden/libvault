@@ -56,6 +56,32 @@ defmodule Vault.Auth.ApproleTest do
     assert client.credentials == @credentials
   end
 
+  test "Approle login with string credential params", %{bypass: bypass} do
+    Bypass.expect_once(bypass, "POST", "/v1/auth/approler-derby/login", fn conn ->
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+      assert Jason.decode!(body) == %{"role_id" => "role_id", "secret_id" => "secret_id"}
+
+      conn
+      |> Plug.Conn.put_resp_content_type("application/json")
+      |> Plug.Conn.resp(200, Jason.encode!(@valid_response))
+    end)
+
+    string_creds = %{"role_id" => "role_id", "secret_id" => "secret_id"}
+
+    {:ok, client} =
+      Vault.new(
+        host: "http://localhost:#{bypass.port}",
+        auth: Vault.Auth.Approle,
+        auth_path: "approler-derby",
+        http: Vault.HTTP.Tesla
+      )
+      |> Vault.auth(string_creds)
+
+    assert Vault.token_expired?(client) == false
+    assert client.token == "token"
+    assert client.credentials == string_creds
+  end
+
   test "Approle login with invalid credentials", %{bypass: bypass} do
     Bypass.expect_once(bypass, "POST", "/v1/auth/approle/login", fn conn ->
       conn

@@ -37,7 +37,7 @@ defmodule Vault do
 
   Most JSON libraries provide the same methods, so no default adapter is needed.
   You can use `Jason`, `JSX`, `Poison`, or whatever encoder you want.
-  
+
   Defaults to `Jason` if present, falling back to `Poison` if present,
   ultimately falling back to `nil`.
 
@@ -304,9 +304,9 @@ defmodule Vault do
 
   @doc """
   Set the path used when logging in with your auth adapter. 
-  
+
   ## Examples 
-  
+
   Auth backends can be mounted at any path on `/auth/`. If left unset, the auth adapter may 
   provide a default, eg `userpass`.  See your Auth adapter for details.
 
@@ -324,7 +324,7 @@ defmodule Vault do
   Sets the login credentials for this client.
 
   ## Examples 
-  
+
   ```
   vault = Vault.set_credentials(vault, %{username: "UserN4me", password: "P@55w0rd"})
   ```
@@ -336,7 +336,7 @@ defmodule Vault do
 
   @doc """
   Authenticate against the configured auth backend.
-  
+
   ## Examples
 
   A successful authentication returns a client containing a valid token, as well as the 
@@ -418,7 +418,7 @@ defmodule Vault do
 
   @doc """
   Read a secret from the configured secret engine.
-  
+
   ## Examples 
 
   Provided adapters return the values on the `data` key from vault, if present. 
@@ -512,9 +512,9 @@ defmodule Vault do
 
   @doc """
   Delete a secret from the configured secret engine.
-  
+
   ## Examples
-  
+
   Returns the response from vault, which is typically an empty map. See Secret 
   Engine Adapter options for further configuration.
 

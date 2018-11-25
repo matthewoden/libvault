@@ -13,7 +13,11 @@ defmodule Vault.Auth.LDAP do
   ## Examples
 
   ```
+  # Atom map
   {:ok, token, ttl} = Vault.Auth.LDAP.login(%{ username: "username", password: "password" })
+
+  # String map
+  {:ok, token, ttl} = Vault.Auth.LDAP.login(%{ "username" => "username", "password" => "password" })
   ```
   """
   @impl true
@@ -44,6 +48,11 @@ defmodule Vault.Auth.LDAP do
       {:error, response} ->
         {:error, ["Http adapter error", response]}
     end
+  end
+
+  defp validate_params(%{"username" => username, "password" => password} = params)
+       when is_binary(username) and is_binary(password) do
+    {:ok, %{username: username, password: password}}
   end
 
   defp validate_params(%{username: username, password: password} = params)

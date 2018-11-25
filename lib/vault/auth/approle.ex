@@ -11,7 +11,12 @@ defmodule Vault.Auth.Approle do
 
   ## Examples
   ```
+  # Atom Map
   {:ok, token, ttl } = Vault.Auth.Approle.login(%{role_id: role_id, secret_id: secret_id})
+  
+  # String map
+  {:ok, token, ttl } = Vault.Auth.Approle.login(%{"role_id" => role_id, "secret_id" => secret_id})
+
   ```
   """
 
@@ -41,6 +46,11 @@ defmodule Vault.Auth.Approle do
       {:error, response} ->
         {:error, ["Http adapter error", response]}
     end
+  end
+
+  defp validate_params(%{"role_id" => role_id, "secret_id" => secret_id} = params)
+       when is_binary(role_id) and is_binary(secret_id) do
+    {:ok, %{role_id: role_id, secret_id: secret_id}}
   end
 
   defp validate_params(%{role_id: role_id, secret_id: secret_id} = params)

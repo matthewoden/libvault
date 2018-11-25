@@ -13,7 +13,12 @@ defmodule Vault.Auth.UserPass do
   ## Examples
 
   ```
-  {:ok, token, ttl} = login(%{ username: username, password: password })
+  # Atom map
+  {:ok, token, ttl} = Vault.Auth.Userpass.login(%{ username: username, password: password })
+
+  # String Map
+  {:ok, token, ttl} = Vault.Auth.Userpass.login(%{ "username" => "username", "password" => "password" })
+
   ```
   """
   @impl true
@@ -44,6 +49,11 @@ defmodule Vault.Auth.UserPass do
       {:error, response} ->
         {:error, ["Http adapter error", response]}
     end
+  end
+
+  defp validate_params(%{"username" => username, "password" => password} = params)
+       when is_binary(username) and is_binary(password) do
+    {:ok, %{username: username, password: password}}
   end
 
   defp validate_params(%{username: username, password: password} = params)

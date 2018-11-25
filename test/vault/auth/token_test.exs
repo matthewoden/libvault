@@ -33,6 +33,33 @@ defmodule Vault.Auth.TokenTest do
     assert client.credentials == @credentials
   end
 
+  test "Token login with string-map credentials", %{bypass: bypass} do
+    Bypass.expect_once(bypass, "GET", "/v1/auth/token/lookup-self", fn conn ->
+      assert ["good_credentials"] == Plug.Conn.get_req_header(conn, "x-vault-token")
+
+      conn
+      |> Plug.Conn.put_resp_content_type("application/json")
+      |> Plug.Conn.resp(
+        200,
+        Jason.encode!(%{data: %{id: "token", ttl: 2000}})
+      )
+    end)
+
+    string_creds =  %{"token" => "good_credentials"}
+
+    {:ok, client} =
+      Vault.new(
+        host: "http://localhost:#{bypass.port}",
+        auth: Vault.Auth.Token,
+        http: Vault.HTTP.Tesla
+      )
+      |> Vault.auth(string_creds)
+
+    assert Vault.token_expired?(client) == false
+    assert client.token == "token"
+    assert client.credentials == string_creds
+  end
+
   test "Token login with an invalid token", %{bypass: bypass} do
     Bypass.expect_once(bypass, "GET", "/v1/auth/token/lookup-self", fn conn ->
       conn

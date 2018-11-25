@@ -13,7 +13,11 @@ defmodule Vault.Auth.Azure do
   ## Examples
 
   ```
-  {:ok, token, ttl} = Vault.Auth.Kubernetes.login(vault, %{role: "my-role", jwt: "my-jwt"})
+  # Atom map
+  {:ok, token, ttl} = Vault.Auth.Azure.login(vault, %{role: "my-role", jwt: "my-jwt"})
+
+  # String map
+  {:ok, token, ttl} = Vault.Auth.Azure.login(vault, %{"role" => "my-role", "jwt" => "my-jwt"})
   ```
   """
   @impl true
@@ -42,6 +46,11 @@ defmodule Vault.Auth.Azure do
       {:error, response} ->
         {:error, ["Http adapter error", inspect(response)]}
     end
+  end
+
+  defp validate_params(%{"role" => role, "jwt" => jwt} = params)
+       when is_binary(role) and is_binary(jwt) do
+    {:ok, %{role: role, jwt: jwt}}
   end
 
   defp validate_params(%{role: role, jwt: jwt} = params)

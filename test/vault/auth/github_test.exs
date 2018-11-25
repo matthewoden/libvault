@@ -32,6 +32,31 @@ defmodule Vault.Auth.GithubTest do
     assert client.credentials == @credentials
   end
 
+  test "Github login with string-map credentials", %{bypass: bypass} do
+    Bypass.expect_once(bypass, "POST", "/v1/auth/github/login", fn conn ->
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+      assert Jason.decode!(body) == %{"token" => "valid_token"}
+
+      conn
+      |> Plug.Conn.put_resp_content_type("application/json")
+      |> Plug.Conn.resp(200, Jason.encode!(@valid_response))
+    end)
+
+    string_creds = %{"token" => "valid_token"}
+
+    {:ok, client} =
+      Vault.new(
+        host: "http://localhost:#{bypass.port}",
+        auth: Vault.Auth.Github,
+        http: Vault.HTTP.Tesla
+      )
+      |> Vault.auth(string_creds)
+
+    assert Vault.token_expired?(client) == false
+    assert client.token == "token"
+    assert client.credentials == string_creds
+  end
+
   test "Github login with custom mount path", %{bypass: bypass} do
     Bypass.expect_once(bypass, "POST", "/v1/auth/ghe/login", fn conn ->
       {:ok, body, conn} = Plug.Conn.read_body(conn)

@@ -32,6 +32,31 @@ defmodule Vault.Auth.UserPassTest do
     assert client.credentials == @credentials
   end
 
+  test "Userpass login with string-map valid credentials", %{bypass: bypass} do
+    Bypass.expect_once(bypass, "POST", "/v1/auth/userpass/login/username", fn conn ->
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+      assert Jason.decode!(body) == %{"password" => "p@55w0rd"}
+
+      conn
+      |> Plug.Conn.put_resp_content_type("application/json")
+      |> Plug.Conn.resp(200, Jason.encode!(@valid_response))
+    end)
+
+    string_creds = %{"username" => "username", "password" => "p@55w0rd"}
+
+    {:ok, client} =
+      Vault.new(
+        host: "http://localhost:#{bypass.port}",
+        auth: Vault.Auth.UserPass,
+        http: Vault.HTTP.Tesla
+      )
+      |> Vault.auth(string_creds)
+
+    assert Vault.token_expired?(client) == false
+    assert client.token == "token"
+    assert client.credentials == string_creds
+  end
+
   test "Userpass login with custom mount path", %{bypass: bypass} do
     Bypass.expect_once(bypass, "POST", "/v1/auth/loserpass/login/username", fn conn ->
       {:ok, body, conn} = Plug.Conn.read_body(conn)

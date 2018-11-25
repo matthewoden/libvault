@@ -33,6 +33,31 @@ defmodule Vault.Auth.LdapTest do
     assert client.credentials == @credentials
   end
 
+  test "LDAP login with valid string-map credentials", %{bypass: bypass} do
+    Bypass.expect_once(bypass, "POST", "/v1/auth/ldap/login/good_credentials", fn conn ->
+      {:ok, body, conn} = Plug.Conn.read_body(conn)
+      assert Jason.decode!(body) == %{"password" => "p@55w0rd"}
+
+      conn
+      |> Plug.Conn.put_resp_content_type("application/json")
+      |> Plug.Conn.resp(200, Jason.encode!(@valid_response))
+    end)
+
+    string_creds = %{"username" => "good_credentials", "password" => "p@55w0rd"}
+
+    {:ok, client} =
+      Vault.new(
+        host: "http://localhost:#{bypass.port}",
+        auth: Vault.Auth.LDAP,
+        http: Vault.HTTP.Tesla
+      )
+      |> Vault.auth(string_creds)
+
+    assert Vault.token_expired?(client) == false
+    assert client.token == "token"
+    assert client.credentials == string_creds
+  end
+
   test "LDAP login with custom mount path", %{bypass: bypass} do
     Bypass.expect_once(bypass, "POST", "/v1/auth/dapper/login/good_credentials", fn conn ->
       {:ok, body, conn} = Plug.Conn.read_body(conn)

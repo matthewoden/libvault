@@ -12,7 +12,11 @@ defmodule Vault.Auth.Github do
   ## Examples
 
   ```
+  # Atom map
   {:ok, token, ttl} = Vault.Auth.Github.login(vault, %{token: access_token})
+  
+  # String map
+  {:ok, token, ttl} = Vault.Auth.Github.login(%{"token" => access_token })
   ```
   """
   @impl true
@@ -41,6 +45,10 @@ defmodule Vault.Auth.Github do
       {:error, response} ->
         {:error, ["Http adapter error", inspect(response)]}
     end
+  end
+
+  defp validate_params(%{"token" => token} = params) when is_binary(token) do
+    {:ok, %{token: token}}
   end
 
   defp validate_params(%{token: token} = params) when is_binary(token) do
