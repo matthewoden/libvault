@@ -4,10 +4,10 @@ defmodule Vault.Auth.Adapter do
 
   ## Writing your own adapter
   Auth adapters are pretty simple. You build a url, map the parameters, and grab
-  the response. Each auth adapter has access to the http client, and should use
-  it to make login requests.
+  the response. Feel free to use the provided `Vault.HTTP client to make http 
+  requests against your vault instance. 
 
-  In most cases, you'll end up sending a POST to `/v1/auth/SOME_BACKEND/login`, 
+  In most cases, you'll end up sending a POST to `auth/SOME_BACKEND/login`, 
   and pass the parameters along as a body. Below, you'll find a starting template 
   for your own adapter. If you're writing an official implementation, check the 
   Docs link below for the spec.
@@ -30,7 +30,7 @@ defmodule Vault.Auth.Adapter do
       url = "auth/MY_NEW_AUTH/login"
 
       request_options =  [body: %{ password: password }, headers: headers]
-      with {:ok, response} <- Vault.HTTP.request(vault,:post, url, request_options) do
+      with {:ok, response} <- Vault.HTTP.post(vault, url, request_options) do
         case response do
           %{"errors" => messages} ->
             {:error, messages}

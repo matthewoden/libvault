@@ -1,6 +1,6 @@
 defmodule Vault.Engine.Adapter do
   @moduledoc """
-  Adapter specificication for Secret Engines
+  Adapter specificication for Vault Secret Engines
   """
 
   @type vault :: Vault.t()
