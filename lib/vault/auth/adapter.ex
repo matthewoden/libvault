@@ -4,7 +4,7 @@ defmodule Vault.Auth.Adapter do
 
   ## Writing your own adapter
   Auth adapters are pretty simple. You build a url, map the parameters, and grab
-  the response. Feel free to use the provided `Vault.HTTP client to make http 
+  the response. Feel free to use the provided `Vault.HTTP` module to make http 
   requests against your vault instance. 
 
   In most cases, you'll end up sending a POST to `auth/SOME_BACKEND/login`, 
