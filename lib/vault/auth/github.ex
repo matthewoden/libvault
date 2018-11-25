@@ -47,7 +47,7 @@ defmodule Vault.Auth.Github do
     end
   end
 
-  defp validate_params(%{"token" => token} = params) when is_binary(token) do
+  defp validate_params(%{"token" => token}) when is_binary(token) do
     {:ok, %{token: token}}
   end
 

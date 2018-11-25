@@ -48,7 +48,7 @@ defmodule Vault.Auth.Azure do
     end
   end
 
-  defp validate_params(%{"role" => role, "jwt" => jwt} = params)
+  defp validate_params(%{"role" => role, "jwt" => jwt})
        when is_binary(role) and is_binary(jwt) do
     {:ok, %{role: role, jwt: jwt}}
   end

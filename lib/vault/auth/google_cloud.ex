@@ -15,7 +15,7 @@ defmodule Vault.Auth.GoogleCloud do
   ```
   # Atom map
   {:ok, token, ttl} = Vault.Auth.GoogleCloud.login(vault, %{role: "my-role", jwt: "my-jwt"})
-  
+
   # String Map
   {:ok, token, ttl} = Vault.Auth.GoogleCloud.login(vault, %{"role" => "my-role", "jwt" => "my-jwt"})
 
@@ -49,7 +49,7 @@ defmodule Vault.Auth.GoogleCloud do
     end
   end
 
-  defp validate_params(%{"role" => role, "jwt" => jwt} = params)
+  defp validate_params(%{"role" => role, "jwt" => jwt})
        when is_binary(role) and is_binary(jwt) do
     {:ok, %{role: role, jwt: jwt}}
   end

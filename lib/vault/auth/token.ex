@@ -59,7 +59,7 @@ defmodule Vault.Auth.Token do
     "auth/token/lookup-self"
   end
 
-  defp validate_params(%{"token" => token} = params)
+  defp validate_params(%{"token" => token})
        when is_binary(token) do
     {:ok, %{token: token}}
   end

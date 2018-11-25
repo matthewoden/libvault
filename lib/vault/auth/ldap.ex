@@ -50,7 +50,7 @@ defmodule Vault.Auth.LDAP do
     end
   end
 
-  defp validate_params(%{"username" => username, "password" => password} = params)
+  defp validate_params(%{"username" => username, "password" => password})
        when is_binary(username) and is_binary(password) do
     {:ok, %{username: username, password: password}}
   end

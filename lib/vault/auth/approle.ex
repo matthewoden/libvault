@@ -13,7 +13,7 @@ defmodule Vault.Auth.Approle do
   ```
   # Atom Map
   {:ok, token, ttl } = Vault.Auth.Approle.login(%{role_id: role_id, secret_id: secret_id})
-  
+
   # String map
   {:ok, token, ttl } = Vault.Auth.Approle.login(%{"role_id" => role_id, "secret_id" => secret_id})
 
@@ -48,7 +48,7 @@ defmodule Vault.Auth.Approle do
     end
   end
 
-  defp validate_params(%{"role_id" => role_id, "secret_id" => secret_id} = params)
+  defp validate_params(%{"role_id" => role_id, "secret_id" => secret_id})
        when is_binary(role_id) and is_binary(secret_id) do
     {:ok, %{role_id: role_id, secret_id: secret_id}}
   end
