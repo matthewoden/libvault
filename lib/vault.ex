@@ -246,7 +246,7 @@ defmodule Vault do
 
   The port should be provided if needed, along with the protocol.
   ```
-  vault =Vault.set_host(vault, "https://my-vault.host.com:12345")
+  vault = Vault.set_host(vault, "https://my-vault.host.com:12345")
   ```
   """
   @spec set_host(t, host) :: t
@@ -258,7 +258,14 @@ defmodule Vault do
   end
 
   @doc """
-  Set the `Vault.Http` adapter for the client.
+  Set the http module used to make API calls.
+
+  ## Examples
+
+  Should be a module that meets the `Vault.HTTP.Adapter` behaviour.
+  ```
+  vault = Vault.set_http(vault, Vault.HTTP.Tesla)
+  ```
   """
   @spec set_http(t, http) :: t
   def set_http(%__MODULE__{} = vault, http) do
@@ -266,7 +273,14 @@ defmodule Vault do
   end
 
   @doc """
-  Set the `Vault.Engine` for the client.
+  Set the secret engine for the client.
+
+  ## Examples
+  The secret engine should be a module that meets the `Vault.Engine.Adapter` behaviour.
+
+  ```
+  vault = Vault.set_engine(vault, Vault.Engine.KVV2)
+  ```
   """
   @spec set_engine(t, engine) :: t
   def set_engine(%__MODULE__{} = vault, engine) do
@@ -274,7 +288,14 @@ defmodule Vault do
   end
 
   @doc """
-  Set the `Vault.Auth` for the client.
+  Set the backend to use for authenticating the client.
+
+  ## Examples
+  The auth backend should be a module that meets the `Vault.Auth.Adapter` behaviour.
+
+  ```
+  vault = Vault.set_auth(vault, Vault.Auth.Approle)
+  ```
   """
   @spec set_auth(t, auth) :: t
   def set_auth(%__MODULE__{} = vault, auth) do
@@ -282,16 +303,31 @@ defmodule Vault do
   end
 
   @doc """
-  Set the path used when logging in with your auth adapter. Should not contain a leading slash. If left 
-  unset, the auth adapter may provide a default. See your Auth adapter for details.
+  Set the path used when logging in with your auth adapter. 
+  
+  ## Examples 
+  
+  Auth backends can be mounted at any path on `/auth/`. If left unset, the auth adapter may 
+  provide a default, eg `userpass`.  See your Auth adapter for details.
+
+  ```
+  vault = Vault.set_auth_path(vault, "auth-path")
+  ```
   """
   @spec set_auth_path(t, auth_path) :: t
   def set_auth_path(%__MODULE__{} = vault, auth_path) when is_binary(auth_path) do
-    %{vault | auth_path: auth_path}
+    path = String.trim_leading(auth_path, "/")
+    %{vault | auth_path: path}
   end
 
   @doc """
-  Sets the default login credentials for this client.
+  Sets the login credentials for this client.
+
+  ## Examples 
+  
+  ```
+  vault = Vault.set_credentials(vault, %{username: "UserN4me", password: "P@55w0rd"})
+  ```
   """
   @spec set_credentials(t, map) :: t
   def set_credentials(%__MODULE__{} = vault, creds) when is_map(creds) do
@@ -299,11 +335,23 @@ defmodule Vault do
   end
 
   @doc """
-  Get a token for the configured auth provider. Authenticate to get a token, then 
-  perform a number of vault operations.
+  Authenticate against the configured auth backend.
+  
+  ## Examples
+
+  A successful authentication returns a client containing a valid token, as well as the 
+  expiration time for the token. Perform this operation before reading or 
+  writing secrets.
+
+  Errors from vault are returned as a list of strings.
 
   Uses pre-configured credentials if provided. Passed in credentials will
-  override existing credential keys. 
+  override existing credentials. 
+  ```
+  {:ok, vault} = Vault.set_credentials(vault, %{username: "UserN4me", password: "P@55w0rd"})
+
+  {:error, ["Missing Credentials, username and password are required"]} = Vault.set_credentials(vault, %{username: "whoops"})
+  ```
   """
   @spec auth(t, map) :: {:ok, t} | {:error, [term]}
   def auth(vault, params \\ %{})
@@ -332,6 +380,15 @@ defmodule Vault do
 
   @doc """
   Check if the current token is still valid.
+
+  ## Examples
+
+  Returns true if the current time is later than the expiration date, otherwise false.
+
+  ```
+  true = Vault.token_expired?(vault)
+  ```
+
   """
   @spec token_expired?(t) :: true | false
   def token_expired?(%__MODULE__{token_expires_at: nil}), do: true
@@ -348,12 +405,32 @@ defmodule Vault do
 
   @doc """
   Get a `NaiveDateTime` struct, in UTC, for when the current token will expire.
+
+  ## Examples
+
+  Expiration time is generated from the current time on the current server.
+
+  ```
+  ~N[2018-11-25 16:30:30.177731] = Vault.token_expires_at(vault)
+  ```
   """
   def token_expires_at(client), do: client.token_expires_at
 
   @doc """
-  Read a secret from the configured secret engine. See Secret Engine adapter options
-  for further configuration, such as fetching a versioned secret.
+  Read a secret from the configured secret engine.
+  
+  ## Examples 
+
+  Provided adapters return the values on the `data` key from vault, if present. 
+  See Secret Engine adapter details for additional configuration, such as 
+  returning the full response.
+
+  Errors from vault are returned as a list of strings.
+  ```
+  {:ok, %{ password: "value" }} = Vault.write(vault,"secret/path/to/read")
+
+  {:error, ["Unauthorized"]} = Vault.read(vault,"secret/bad/path")
+  ```
   """
   @spec read(t, String.t(), list()) :: {:ok, map} | {:error, term}
   def read(vault, path, options \\ [])
@@ -369,9 +446,20 @@ defmodule Vault do
   end
 
   @doc """
-  Write a secret to the configured secret engine. Returns the response from vault, 
-  along with the value written. See Secret Engine adapter details for additional 
-  configuration (such as versioning)
+  Write a secret to the configured secret engine. 
+
+  ## Examples 
+
+  Provided adapters returns the values on the `data` key from vault, if present. 
+  See Secret Engine adapter details for additional configuration, such as 
+  returning the full response.
+
+  Errors from vault are returned as a list of strings.
+  ```
+  {:ok, %{ version: 1 }} = Vault.write(vault,"secret/path/to/write", %{ secret: "value"})
+
+  {:error, ["Unauthorized"]} = Vault.write(vault,"secret/bad/path", %{ secret: "value"})
+  ```
   """
   @spec write(t, String.t(), term, list()) :: {:ok, map} | {:error, term}
   def write(vault, path, value, options \\ [])
@@ -385,7 +473,7 @@ defmodule Vault do
   def write(%__MODULE__{engine: engine} = vault, path, value, options) do
     case engine.write(vault, String.trim_leading(path, "/"), value, options) do
       {:ok, data} ->
-        {:ok, Map.merge(data || %{}, %{"value" => value})}
+        {:ok, Map.merge(%{"value" => value}, data || %{})}
 
       otherwise ->
         otherwise
@@ -393,8 +481,21 @@ defmodule Vault do
   end
 
   @doc """
-  List secret keys available at a certain path. See Engine adapter options
-  for further configuration.
+  List secret keys available at a certain path.
+
+  ## Examples 
+
+  Path should end with a trailing slash. Provided adapters returns the values on
+  the  `data` key from vault, if present. See Secret Engine adapter details for 
+  additional configuration, such as returning the full response.
+
+  Errors from vault are returned as a list of strings.
+
+  ```
+  {:ok, %{ "keys" => ["some/", "paths", "returned"] }} = Vault.list(vault,"secret/path/to/write")
+
+  {:error, ["Unauthorized"]} = Vault.list(vault,"secret/bad/path/")
+  ```
   """
   @spec list(t, String.t(), list()) :: {:ok, map} | {:error, term}
   def list(vault, path, options \\ [])
@@ -410,9 +511,18 @@ defmodule Vault do
   end
 
   @doc """
-  Delete a secret from the configured secret engine. Returns the response from 
-  vault, typically an empty map. See Secret Engine adapter options
-  for further configuration.
+  Delete a secret from the configured secret engine.
+  
+  ## Examples
+  
+  Returns the response from vault, which is typically an empty map. See Secret 
+  Engine Adapter options for further configuration.
+
+   ```
+  {:ok, %{} }} = Vault.delete(vault,"secret/path/to/write")
+
+  {:error, ["Key not found"]} = Vault.list(vault,"secret/bad/path/")
+  ```
   """
   @spec delete(t, String.t(), list()) :: {:ok, map} | {:error, term}
   def delete(vault, path, options \\ [])
@@ -429,13 +539,13 @@ defmodule Vault do
 
   @doc """
   Make an HTTP request against your vault instance, with the current vault token. 
+
+  ## Examples
   This library doesn't cover every vault API, but this can help fill some of the
   gaps, and removing some boilerplate around token management, and JSON parsing.
 
   It can also be handy for renewing dynamic secrets, if you're using the AWS 
   Secret backend.
-
-  ## Examples
 
   Requests can take the following options a Keyword List.
 
