@@ -166,7 +166,7 @@ When possible, tests run against a local vault instance. Otherwise, tests run ag
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
+The package can be installed
 by adding `libvault` to your list of dependencies in `mix.exs`:
 
 ```elixir
