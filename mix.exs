@@ -4,7 +4,7 @@ defmodule Vault.MixProject do
   def project do
     [
       app: :libvault,
-      version: "0.1.2",
+      version: "0.1.3",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
