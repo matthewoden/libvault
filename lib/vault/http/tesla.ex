@@ -33,7 +33,7 @@ if Code.ensure_loaded?(Tesla) do
     @behaviour Vault.HTTP.Adapter
 
     defp client() do
-      Tesla.build_client([
+      Tesla.client([
         {Tesla.Middleware.FollowRedirects, []}
       ])
     end
