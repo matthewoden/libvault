@@ -359,7 +359,7 @@ defmodule Vault do
   def auth(%__MODULE__{auth: nil, http: _}, _params), do: {:error, ["auth client not set"]}
 
   def auth(%__MODULE__{auth: auth, credentials: creds} = vault, params) do
-    new_creds = Map.merge(creds, params)
+    new_creds = if is_map(creds), do: Map.merge(creds, params), else: params
 
     case auth.login(vault, new_creds) do
       {:ok, token, ttl} ->
