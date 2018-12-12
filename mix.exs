@@ -4,7 +4,7 @@ defmodule Vault.MixProject do
   def project do
     [
       app: :libvault,
-      version: "0.1.1",
+      version: "0.1.2",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
@@ -32,7 +32,7 @@ defmodule Vault.MixProject do
       # http clients
       {:ibrowse, "~> 4.4.0", optional: true},
       {:hackney, "~> 1.6", optional: true},
-      {:tesla, "~> 1.0.0", optional: true},
+      {:tesla, "~> 1.0", optional: true},
 
       # json parsers
       {:jason, ">= 1.0.0", optional: true},
