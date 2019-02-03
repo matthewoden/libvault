@@ -45,7 +45,7 @@ defmodule Vault.Auth.TokenTest do
       )
     end)
 
-    string_creds =  %{"token" => "good_credentials"}
+    string_creds = %{"token" => "good_credentials"}
 
     {:ok, client} =
       Vault.new(

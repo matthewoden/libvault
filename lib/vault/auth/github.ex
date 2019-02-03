@@ -14,7 +14,7 @@ defmodule Vault.Auth.Github do
   ```
   # Atom map
   {:ok, token, ttl} = Vault.Auth.Github.login(vault, %{token: access_token})
-  
+
   # String map
   {:ok, token, ttl} = Vault.Auth.Github.login(%{"token" => access_token })
   ```
