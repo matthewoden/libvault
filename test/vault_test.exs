@@ -93,7 +93,7 @@ defmodule VaultTest do
   end
 
   test "token_expired? returns true when token_expires_at is in the past" do
-    token_expires_at = NaiveDateTime.utc_now() |> NaiveDateTime.add(-1000, :seconds)
+    token_expires_at = NaiveDateTime.utc_now() |> NaiveDateTime.add(-1000, :second)
 
     result =
       Vault.new(%{token: "token", token_expires_at: token_expires_at})
@@ -103,7 +103,7 @@ defmodule VaultTest do
   end
 
   test "token_expired? returns false when token_expires_at is in the future" do
-    token_expires_at = NaiveDateTime.utc_now() |> NaiveDateTime.add(1000, :seconds)
+    token_expires_at = NaiveDateTime.utc_now() |> NaiveDateTime.add(1000, :second)
 
     result =
       Vault.new(%{token: "token", token_expires_at: token_expires_at})
@@ -113,7 +113,7 @@ defmodule VaultTest do
   end
 
   test "token_expires_at returns the date the token will no longer be valid" do
-    token_expires_at = NaiveDateTime.utc_now() |> NaiveDateTime.add(1000, :seconds)
+    token_expires_at = NaiveDateTime.utc_now() |> NaiveDateTime.add(1000, :second)
 
     result =
       Vault.new(%{token: "token", token_expires_at: token_expires_at})

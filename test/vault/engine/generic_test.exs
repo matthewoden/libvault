@@ -8,7 +8,7 @@ defmodule Vault.Engine.GenericTest do
       engine: Vault.Engine.Generic,
       http: Vault.HTTP.Tesla,
       token: token || "root",
-      token_expires_in: NaiveDateTime.utc_now() |> NaiveDateTime.add(2000, :seconds)
+      token_expires_in: NaiveDateTime.utc_now() |> NaiveDateTime.add(2000, :second)
     )
   end
 

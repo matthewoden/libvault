@@ -205,7 +205,7 @@ defmodule Vault do
       auth_path: 'jwt',
       engine: Vault.Engine.Generic,
       token: "abc123",
-      token_expires_at: NaiveDateTime.utc_now() |> NaiveDateTime.add(30, :seconds),
+      token_expires_at: NaiveDateTime.utc_now() |> NaiveDateTime.add(30, :second),
       credentials: %{role_id: "dev-role", jwt: "averylongstringoflettersandnumbers..."}
     })
 
@@ -363,7 +363,7 @@ defmodule Vault do
 
     case auth.login(vault, new_creds) do
       {:ok, token, ttl} ->
-        expires_at = NaiveDateTime.utc_now() |> NaiveDateTime.add(ttl, :seconds)
+        expires_at = NaiveDateTime.utc_now() |> NaiveDateTime.add(ttl, :second)
 
         {:ok,
          %{

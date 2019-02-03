@@ -1,6 +1,8 @@
 defmodule Vault.HTTP.Tesla.Test do
   use ExUnit.Case, async: true
 
+  @moduletag :tesla_adapter
+
   alias Vault.HTTP.Tesla, as: Http
 
   setup do
