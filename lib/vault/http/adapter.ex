@@ -10,6 +10,7 @@ defmodule Vault.HTTP.Adapter do
   @type url :: String.t()
   @type params :: map()
   @type headers :: list({String.t(), String.t()})
+  @type http_options :: Keyword.t()
 
   @type response :: %{
           headers: list,
@@ -17,5 +18,5 @@ defmodule Vault.HTTP.Adapter do
           body: String.t()
         }
 
-  @callback request(method, url, params, headers) :: {:ok, response} | {:error, term}
+  @callback request(method, url, params, headers, http_options) :: {:ok, response} | {:error, term}
 end

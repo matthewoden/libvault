@@ -187,7 +187,8 @@ defmodule VaultTest do
               "method" => "get",
               "headers" => %{"X-Vault-Token" => "token"},
               "path" => "http://localhost/v1/path/to/call",
-              "body" => "{}"
+              "body" => "{}",
+              "http_options" => %{}
             }} == Vault.request(vault, :get, "path/to/call", [])
   end
 
@@ -200,7 +201,8 @@ defmodule VaultTest do
               "method" => "get",
               "headers" => %{"X-Vault-Token" => "token", "X-Forwarded-For" => "http://localhost"},
               "path" => "http://localhost/v1/path/to/call",
-              "body" => "{}"
+              "body" => "{}",
+              "http_options" => %{}
             }} == Vault.request(vault, :get, "path/to/call", headers: headers)
   end
 
@@ -213,7 +215,8 @@ defmodule VaultTest do
               "method" => "get",
               "headers" => %{"X-Vault-Token" => "token"},
               "path" => "http://localhost/v1/path/to/call?cas=0",
-              "body" => "{}"
+              "body" => "{}",
+              "http_options" => %{}
             }} == Vault.request(vault, :get, "path/to/call", query_params: query_params)
   end
 
@@ -225,7 +228,8 @@ defmodule VaultTest do
               "method" => "get",
               "headers" => %{"X-Vault-Token" => "token"},
               "path" => "http://localhost/v3/path/to/call",
-              "body" => "{}"
+              "body" => "{}",
+              "http_options" => %{}
             }} == Vault.request(vault, :get, "path/to/call", version: "v3")
   end
 
@@ -237,7 +241,27 @@ defmodule VaultTest do
               "method" => "get",
               "headers" => %{"X-Vault-Token" => "token"},
               "path" => "http://localhost/v1/path/to/call",
-              "body" => "{\"foo\":\"bar\"}"
+              "body" => "{\"foo\":\"bar\"}",
+              "http_options" => %{}
             }} == Vault.request(vault, :get, "path/to/call", body: %{"foo" => "bar"})
+  end
+
+  test "request can use arbitrary HTTP options" do
+    vault =
+      Vault.new(
+        http: Vault.Http.Test,
+        host: "http://localhost",
+        token: "token",
+        http_options: [my_option: "foo"]
+      )
+
+    assert {:ok,
+            %{
+              "method" => "get",
+              "headers" => %{"X-Vault-Token" => "token"},
+              "path" => "http://localhost/v1/path/to/call",
+              "body" => "{}",
+              "http_options" => %{"my_option" => "foo"}
+            }} == Vault.request(vault, :get, "path/to/call")
   end
 end

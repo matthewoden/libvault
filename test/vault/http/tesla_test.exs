@@ -19,7 +19,7 @@ defmodule Vault.HTTP.Tesla.Test do
     end)
 
     assert {:ok, %{body: ~s<{"ok": true}>}} =
-             Http.request(:get, "http://localhost:#{bypass.port}/", nil, [{"test", true}])
+             Http.request(:get, "http://localhost:#{bypass.port}/", nil, [{"test", true}], [])
   end
 
   test "can make a PUT request", %{bypass: bypass} do
@@ -40,7 +40,8 @@ defmodule Vault.HTTP.Tesla.Test do
                Jason.encode!(%{payload: "value"}),
                [
                  {"test", true}
-               ]
+               ],
+               []
              )
   end
 
@@ -62,7 +63,8 @@ defmodule Vault.HTTP.Tesla.Test do
                Jason.encode!(%{payload: "value"}),
                [
                  {"test", true}
-               ]
+               ],
+               []
              )
   end
 
@@ -84,7 +86,8 @@ defmodule Vault.HTTP.Tesla.Test do
                Jason.encode!(%{payload: "value"}),
                [
                  {"test", true}
-               ]
+               ],
+               []
              )
   end
 
@@ -97,7 +100,7 @@ defmodule Vault.HTTP.Tesla.Test do
     end)
 
     assert {:ok, %{body: ~s<{"ok": true}>}} =
-             Http.request(:delete, "http://localhost:#{bypass.port}/", nil, [{"test", true}])
+             Http.request(:delete, "http://localhost:#{bypass.port}/", nil, [{"test", true}], [])
   end
 
   test "can make a HEAD request", %{bypass: bypass} do
@@ -110,10 +113,10 @@ defmodule Vault.HTTP.Tesla.Test do
     end)
 
     assert {:ok, %{body: ""}} =
-             Http.request(:head, "http://localhost:#{bypass.port}/", nil, [{"test", true}])
+             Http.request(:head, "http://localhost:#{bypass.port}/", nil, [{"test", true}], [])
   end
 
-  test "Can handle redirects", %{bypass: bypass} do
+  test "can handle redirects by default", %{bypass: bypass} do
     Bypass.expect_once(bypass, "GET", "/", fn conn ->
       Plug.Conn.put_resp_header(conn, "location", "/redirect")
       |> Plug.Conn.resp(307, "Redirecting")
@@ -124,8 +127,43 @@ defmodule Vault.HTTP.Tesla.Test do
     end)
 
     assert {:ok, %{body: ~s<{"ok": true}>}} =
-             Http.request(:get, "http://localhost:#{bypass.port}/", nil, [
-               {"accept", "applictation/json"}
-             ])
+             Http.request(
+               :get,
+               "http://localhost:#{bypass.port}/",
+               nil,
+               [
+                 {"accept", "applictation/json"}
+               ],
+               []
+             )
+  end
+
+  test "can pass middleware as HTTP option", %{bypass: bypass} do
+    Bypass.expect_once(bypass, fn conn ->
+      [authorization] = Plug.Conn.get_req_header(conn, "authorization")
+
+      assert "Basic dXNlcjpwYXNz" == authorization
+
+      Plug.Conn.resp(conn, 200, ~s<{"ok": true}>)
+    end)
+
+    middleware = [
+      {Tesla.Middleware.BasicAuth, %{username: "user", password: "pass"}}
+    ]
+
+    assert {:ok, %{body: ~s<{"ok": true}>}} =
+             Http.request(:get, "http://localhost:#{bypass.port}/", nil, [],
+               middleware: middleware
+             )
+  end
+
+  test "can pass adapter as HTTP option" do
+    Tesla.Mock.mock(fn
+      %{method: :get} ->
+        %Tesla.Env{status: 200, body: "tesla mock"}
+    end)
+
+    assert {:ok, %{body: "tesla mock"}} =
+             Http.request(:get, "http://localhost/", nil, [], adapter: Tesla.Mock)
   end
 end

@@ -52,7 +52,12 @@ defmodule Vault.HTTP do
   @doc """
   Make an arbitrary request against the configured vault instance. See options above for configuration.
   """
-  def request(%Vault{http: http, host: host, json: json, token: token}, method, path, options) do
+  def request(
+        %Vault{http: http, host: host, json: json, token: token, http_options: http_options},
+        method,
+        path,
+        options
+      ) do
     body = Keyword.get(options, :body, %{})
     query_params = Keyword.get(options, :query_params, %{}) |> URI.encode_query()
     headers = Keyword.get(options, :headers, [])
@@ -62,7 +67,7 @@ defmodule Vault.HTTP do
     url = "#{host}/#{version}/#{path}?#{query_params}" |> String.trim_trailing("?")
 
     with {:ok, encoded} <- encode(json, body),
-         {:ok, %{body: body}} <- http.request(method, url, encoded, headers),
+         {:ok, %{body: body}} <- http.request(method, url, encoded, headers, http_options),
          {:ok, decoded} <- decode(json, body) do
       {:ok, decoded}
     else
