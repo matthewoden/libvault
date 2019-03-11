@@ -1,0 +1,33 @@
+language: elixir
+elixir:
+  - 1.8
+  - 1.7
+  - 1.6
+  - 1.5
+otp_release:
+  - 21.2
+  - 20.3
+matrix:
+  exclude:
+    - elixir: 1.5
+      otp_release: 21.2
+sudo: false
+env:
+  - VAULT_VERSION='1.0.3' VAULT_ADDR='http://127.0.0.1:8200' VAULT_TOKEN=root
+before_script:
+  # The HASHICORP_PUBLIC_KEY env var is configured via Travis UI.
+  # It has the contents of HashiCorp's public key found in https://www.hashicorp.com/security.html
+  - echo "$HASHICORP_PUBLIC_KEY" | gpg --import
+  - curl -Os "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_SHA256SUMS"
+  - curl -Os "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_SHA256SUMS.sig"
+  - curl -Os "https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip"
+  - gpg --verify "vault_${VAULT_VERSION}_SHA256SUMS.sig" "vault_${VAULT_VERSION}_SHA256SUMS"
+  - 'shasum -a 256 -c "vault_${VAULT_VERSION}_SHA256SUMS" | grep "vault_${VAULT_VERSION}_linux_amd64.zip: OK"'
+  - unzip "vault_${VAULT_VERSION}_linux_amd64.zip"
+  - export PATH="$PATH:$(pwd)"
+script:
+  - sh scripts/setup-local-vault.sh &
+  - sleep 2
+  - sh scripts/setup-engines.sh
+  - mix test
+  - TESLA_ADAPTER=ibrowser mix test
