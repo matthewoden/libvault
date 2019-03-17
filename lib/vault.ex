@@ -156,6 +156,7 @@ defmodule Vault do
             engine: Vault.Engine.Generic,
             token: nil,
             token_expires_at: nil,
+            http_options: [],
             credentials: %{}
 
   @type options :: map() | Keyword.t()
@@ -221,6 +222,7 @@ defmodule Vault do
   * `:engine` Module for your Secret Engine adapter. Defaults to `Vault.Engine.Generic`.
   * `:host` - host of your vault instance. Should contain the port, if needed. Should not contain a trailing slash. Defaults to `System.get_env("VAULT_ADDR")`.
   * `:http` - Module for your http adapter. Defaults to `Vault.HTTP.Tesla` when `:tesla` is present.
+  * `:http_options` - A keyword list of options to your HTTP adapter.
   * `:token` - A vault token.
   * `:token_expires_at` A `NaiveDateTime` instance that represents when the token expires, in utc.
   * `:credentials` - The credentials to use when authenticating with your Auth adapter.
