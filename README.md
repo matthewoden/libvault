@@ -1,5 +1,7 @@
 # libvault
 
+[![build status](https://travis-ci.org/matthewoden/libvault.svg?branch=master)](https://travis-ci.org/matthewoden/libvault)
+
 Highly configurable library for HashiCorp's Vault - handles authentication
 for multiple backends, and reading, writing, listing, and deleting secrets
 for a variety of engines.
