@@ -4,7 +4,7 @@ defmodule Vault.MixProject do
   def project do
     [
       app: :libvault,
-      version: "0.1.3",
+      version: "0.2.0",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
@@ -55,8 +55,8 @@ defmodule Vault.MixProject do
 
   defp description do
     "
-    Highly configurable library for HashiCorp's Vault - handles authentication 
-    for multiple backends, and reading, writing, listing, and deleting secrets 
+    Highly configurable library for HashiCorp's Vault - handles authentication
+    for multiple backends, and reading, writing, listing, and deleting secrets
     for a variety of engines.
     "
   end

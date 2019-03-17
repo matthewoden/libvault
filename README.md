@@ -164,7 +164,7 @@ When possible, tests run against a local vault instance. Otherwise, tests run ag
 
 1. In the current directory, set up a local dev server with `sh scripts/setup-local-vault`
 
-1. Vault (at this time) can't be run in the background without a docker instace. For now, set up the local secret engine paths with `sh scripts/setup-engines.sh`
+1. Vault (at this time) can't be run in the background without a docker instance. For now, set up the local secret engine paths with `sh scripts/setup-engines.sh`
 
 ## Installation
 

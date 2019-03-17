@@ -18,5 +18,6 @@ defmodule Vault.HTTP.Adapter do
           body: String.t()
         }
 
-  @callback request(method, url, params, headers, http_options) :: {:ok, response} | {:error, term}
+  @callback request(method, url, params, headers, http_options) ::
+              {:ok, response} | {:error, term}
 end

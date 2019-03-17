@@ -23,3 +23,6 @@ erl_crash.dump
 vault-*.tar
 
 _json
+
+#ignore elixir language server. 
+.elixir_ls
