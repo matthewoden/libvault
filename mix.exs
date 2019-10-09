@@ -32,7 +32,7 @@ defmodule Vault.MixProject do
       # http clients
       {:ibrowse, "~> 4.4.0", optional: true},
       {:hackney, "~> 1.6", optional: true},
-      {:tesla, "~> 1.0", optional: true},
+      {:tesla, "~> 1.3", optional: true},
 
       # json parsers
       {:jason, ">= 1.0.0", optional: true},
