@@ -29,7 +29,7 @@ further flexibility with the API.
 
 Hashicorp's Vault is highly configurable. Rather than cover every possible option,
 this library strives to be flexible and adaptable. Auth backends, Secret
-Engines, and Http clients are all replacable, and each behaviour asks for a
+Engines, and HTTP clients are all replaceable, and each behaviour asks for a
 minimal contract.
 
 ## HTTP Adapters
@@ -37,9 +37,9 @@ minimal contract.
 The following HTTP Adapters are provided:
 
 - `Tesla` with `Vault.HTTP.Tesla`
-  - Can be configured to use `:hackney`, `:ibrowse`, or `:httpc` (and in turn, plays nice with `HTTPoison`, and `HTTPotion`)
+  - Can be configured to use [`Hackney`][hackney], [`iBrowse`][ibrowse] or [`Mint`][mint]
 
-Be sure to add applications and dependancies to your mixfile as needed.
+Be sure to add applications and dependencies to your mix file as needed.
 
 ### JSON Adapters
 
@@ -87,39 +87,29 @@ access additional API endpoints, this library also provides a `Vault.request`
 method. This should allow you to tap into the complete vault REST API, while still
 benefiting from token control, JSON parsing, and other HTTP client nicities.
 
-## Setup and Usage
+## Installation and Usage
 
-### Setup
+### Installation
 
-Ensure that any adapter dependancies have been included as part of your application's
-dependancies and extra_applications:
+Ensure that any adapter dependencies have been included as part of your application's
+dependencies:
 
 ```elixir
-  def application do
-    [
-      extra_applications: [:logger, :hackney, :tesla,] # or :ibrowse
-      mod: {MyApp.Application, []}
-    ]
-  end
+def deps do
+  [
+    {:libvault, "~> 0.2.0"},
 
-  def deps do
-    [
-      # libvault (required#)
-      {:libvault, "~> 0.1.0"},
+    # tesla, required for Vault.HTTP.Tesla
+    {:tesla, "~> 1.3.0"},
 
-      # tesla, required for Vault.HTTP.Tesla
-      {:tesla, "~> 1.0.0", },
+    # pick your HTTP client - Mint, iBrowse or hackney
+    {:mint, "~> 0.4.0"},
+    {:castore, "~> 0.1.0"},
 
-      # pick your HTTP client - ibrowse, hackney, or if you're feeling bold, :httpc.
-      {:ibrowse, "~> 4.4.0", },
-      {:hackney, "~> 1.6", },
-
-      # Pick your json parser
-      {:jason, ">= 1.0.0", },
-      {:poison, "~> 3.0", },
-    ]
-
-  end
+    # Pick your json parser - Jason or Poison
+    {:jason, ">= 1.0.0"}
+  ]
+end
 ```
 
 ### Usage
@@ -160,25 +150,16 @@ See the full `Vault` client for additional methods.
 
 When possible, tests run against a local vault instance. Otherwise, tests run against the Vault Spec, using bypass to test to confirm the success case, and follows vault patterns for failure.
 
-1. Install the vault go cli https://www.vaultproject.io/downloads.html
+1. Install the Vault Go CLI https://www.vaultproject.io/downloads.html
 
 1. In the current directory, set up a local dev server with `sh scripts/setup-local-vault`
 
 1. Vault (at this time) can't be run in the background without a docker instance. For now, set up the local secret engine paths with `sh scripts/setup-engines.sh`
 
-## Installation
-
-The package can be installed
-by adding `libvault` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:libvault, "~> 0.1.0"}
-  ]
-end
-```
-
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/libvault](https://hexdocs.pm/libvault).
+
+[mint]: https://github.com/ericmj/mint
+[hackney]: https://github.com/benoitc/hackney
+[ibrowse]: https://github.com/cmullaparthi/ibrowse
