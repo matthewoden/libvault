@@ -37,8 +37,8 @@ defmodule Vault.MixProject do
       {:tesla, "~> 1.3", optional: true},
 
       # json parsers
-      {:jason, ">= 1.0.0", optional: true},
-      {:poison, "~> 3.0", optional: true},
+      {:jason, ">= 1.0.0", only: [:dev, :test]},
+      {:poison, "~> 3.0", only: [:dev, :test]},
       # testing
       {:bypass, "~> 1.0", only: :test},
       {:plug_cowboy, "~> 1.0", only: :test},
