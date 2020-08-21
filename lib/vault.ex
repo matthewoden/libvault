@@ -120,9 +120,9 @@ defmodule Vault do
       auth: Vault.Auth.UserPass,
       credentials: %{username: "username", password: "password"}
       http: Vault.Http.Tesla,
-      # Note - `:http_options` are adapter-specific.
-      http_options: { ssl_options: [certfile: "certs/client.crt"] }
-      host: https://my.vault.pizza
+      # Note - `:http_options` are specific to the http adapter.
+      http_options: [{ ssl_options: [certfile: "certs/client.crt"] }]
+      host: "https://my.vault.pizza"
     ])
     |> Vault.auth()
 
