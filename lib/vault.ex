@@ -2,17 +2,17 @@ defmodule Vault do
   @moduledoc """
   The main module for configuring and interacting with HashiCorp's Vault.
 
-  When possible, it tries to emulate the CLI, with `read`, `write`, `list` and 
+  When possible, it tries to emulate the CLI, with `read`, `write`, `list` and
   `delete` methods. An additional `request` method is provided when you need
-  further flexibility. 
+  further flexibility.
 
   ## API Preview
 
   ```elixir
   vault =
     Vault.new([
-      engine: Vault.Engine.KVV2, 
-      auth: Vault.Auth.UserPass 
+      engine: Vault.Engine.KVV2,
+      auth: Vault.Auth.UserPass
     ])
     |> Vault.auth(%{username: "username", password: "password"})
 
@@ -23,9 +23,9 @@ defmodule Vault do
   ## Flexibility
 
   Hashicorp's Vault is highly configurable. Rather than cover every possible option,
-  this library strives to be flexible and adaptable. Auth backends, Secret 
-  Engines, and Http clients, and JSON parsers are all replacable, and each 
-  behaviour asks for a minimal behaviour contract. 
+  this library strives to be flexible and adaptable. Auth backends, Secret
+  Engines, and Http clients, and JSON parsers are all replacable, and each
+  behaviour asks for a minimal behaviour contract.
 
   ### HTTP Adapters
 
@@ -56,8 +56,8 @@ defmodule Vault do
   - [UserPass](https://www.vaultproject.io/api/auth/userpass/index.html) with `Vault.Auth.UserPass`
   - [Token](https://www.vaultproject.io/api/auth/token/index.html#lookup-a-token-self-) with `Vault.Auth.Token`
 
-  In addition to the above, a generic backend is also provided (`Vault.Auth.Generic`). 
-  If support for auth provider is missing, you can still get up and running 
+  In addition to the above, a generic backend is also provided (`Vault.Auth.Generic`).
+  If support for auth provider is missing, you can still get up and running
   quickly, without writing a new adapter.
 
   ### Secret Engines
@@ -75,7 +75,7 @@ defmodule Vault do
   ### Additional request methods
 
   The core library only handles the basics around secret fetching. If you need to
-  access additional API endpoints, this library also provides a `Vault.request` 
+  access additional API endpoints, this library also provides a `Vault.request`
   method. This should allow you to tap into the complete vault REST API, while still
   benefiting from token control, JSON parsing, and other HTTP client nicities.
 
@@ -100,25 +100,30 @@ defmodule Vault do
       {:ibrowse, "~> 4.4.0", },
       {:hackney, "~> 1.6", },
 
+      {:mint, "~> 1.0"},
+      {:castore, "~> 1.1"}, # mint requires castore
+
       # Pick your json parser
       {:jason, ">= 1.0.0", },
       {:poison, "~> 3.0", },
     ]
-      
+
   end
   ```
-
-
 
   Example usage:
 
   ```
-  vault = 
+  vault =
     Vault.new([
       engine: Vault.Engine.KVV2,
-      auth: Vault.Auth.UserPass, 
+      auth: Vault.Auth.UserPass,
       credentials: %{username: "username", password: "password"}
-    ]) 
+      http: Vault.Http.Tesla,
+      # Note - `:http_options` are specific to the http adapter.
+      http_options: [{ ssl_options: [certfile: "certs/client.crt"] }]
+      host: "https://my.vault.pizza"
+    ])
     |> Vault.auth()
 
   {:ok, db_pass} = Vault.read(vault, "secret/path/to/password")
@@ -128,7 +133,7 @@ defmodule Vault do
   You can configure the client up front, or change configuration dynamically.
 
   ```
-    vault = 
+    vault =
       Vault.new() # use defaults, or application configuration
       |> Vault.set_auth(Vault.Auth.Approle)
       |> Vault.auth(%{role_id: "role_id", secret_id: "secret_id"})
@@ -187,7 +192,7 @@ defmodule Vault do
         }
 
   @doc """
-  Create a new client. Optionally provide a keyword list or map of options for 
+  Create a new client. Optionally provide a keyword list or map of options for
   configuration.
 
   ## Examples
@@ -213,8 +218,8 @@ defmodule Vault do
   ```
 
   ### Options
-  The following options can be provided as part of the `:vault` application config, or 
-  as a Keyword List or Map of options. Runtime configuration will always take 
+  The following options can be provided as part of the `:vault` application config, or
+  as a Keyword List or Map of options. Runtime configuration will always take
   precedence.
 
   * `:auth` - Module for your Auth adapter.
@@ -237,7 +242,7 @@ defmodule Vault do
   end
 
   @doc """
-  Set the host of your vault instance. 
+  Set the host of your vault instance.
 
   ## Examples
 
@@ -305,11 +310,11 @@ defmodule Vault do
   end
 
   @doc """
-  Set the path used when logging in with your auth adapter. 
+  Set the path used when logging in with your auth adapter.
 
-  ## Examples 
+  ## Examples
 
-  Auth backends can be mounted at any path on `/auth/`. If left unset, the auth adapter may 
+  Auth backends can be mounted at any path on `/auth/`. If left unset, the auth adapter may
   provide a default, eg `userpass`.  See your Auth adapter for details.
 
   ```
@@ -325,7 +330,7 @@ defmodule Vault do
   @doc """
   Sets the login credentials for this client.
 
-  ## Examples 
+  ## Examples
 
   ```
   vault = Vault.set_credentials(vault, %{username: "UserN4me", password: "P@55w0rd"})
@@ -341,14 +346,14 @@ defmodule Vault do
 
   ## Examples
 
-  A successful authentication returns a client containing a valid token, as well as the 
-  expiration time for the token. Perform this operation before reading or 
+  A successful authentication returns a client containing a valid token, as well as the
+  expiration time for the token. Perform this operation before reading or
   writing secrets.
 
   Errors from vault are returned as a list of strings.
 
   Uses pre-configured credentials if provided. Passed in credentials will
-  override existing credentials. 
+  override existing credentials.
   ```
   {:ok, vault} = Vault.set_credentials(vault, %{username: "UserN4me", password: "P@55w0rd"})
 
@@ -421,10 +426,10 @@ defmodule Vault do
   @doc """
   Read a secret from the configured secret engine.
 
-  ## Examples 
+  ## Examples
 
-  Provided adapters return the values on the `data` key from vault, if present. 
-  See Secret Engine adapter details for additional configuration, such as 
+  Provided adapters return the values on the `data` key from vault, if present.
+  See Secret Engine adapter details for additional configuration, such as
   returning the full response.
 
   Errors from vault are returned as a list of strings.
@@ -448,12 +453,12 @@ defmodule Vault do
   end
 
   @doc """
-  Write a secret to the configured secret engine. 
+  Write a secret to the configured secret engine.
 
-  ## Examples 
+  ## Examples
 
-  Provided adapters returns the values on the `data` key from vault, if present. 
-  See Secret Engine adapter details for additional configuration, such as 
+  Provided adapters returns the values on the `data` key from vault, if present.
+  See Secret Engine adapter details for additional configuration, such as
   returning the full response.
 
   Errors from vault are returned as a list of strings.
@@ -485,10 +490,10 @@ defmodule Vault do
   @doc """
   List secret keys available at a certain path.
 
-  ## Examples 
+  ## Examples
 
   Path should end with a trailing slash. Provided adapters returns the values on
-  the  `data` key from vault, if present. See Secret Engine adapter details for 
+  the  `data` key from vault, if present. See Secret Engine adapter details for
   additional configuration, such as returning the full response.
 
   Errors from vault are returned as a list of strings.
@@ -517,7 +522,7 @@ defmodule Vault do
 
   ## Examples
 
-  Returns the response from vault, which is typically an empty map. See Secret 
+  Returns the response from vault, which is typically an empty map. See Secret
   Engine Adapter options for further configuration.
 
    ```
@@ -540,13 +545,13 @@ defmodule Vault do
   end
 
   @doc """
-  Make an HTTP request against your vault instance, with the current vault token. 
+  Make an HTTP request against your vault instance, with the current vault token.
 
   ## Examples
   This library doesn't cover every vault API, but this can help fill some of the
   gaps, and removing some boilerplate around token management, and JSON parsing.
 
-  It can also be handy for renewing dynamic secrets, if you're using the AWS 
+  It can also be handy for renewing dynamic secrets, if you're using the AWS
   Secret backend.
 
   Requests can take the following options a Keyword List.
@@ -562,8 +567,8 @@ defmodule Vault do
 
   ```
   vault = Vault.new(
-    http: Vault.HTTP.Tesla, 
-    host: "http://localhost", 
+    http: Vault.HTTP.Tesla,
+    host: "http://localhost",
     token: "token"
     token_expires_in: NaiveDateTime.utc_now()
   )
@@ -578,8 +583,8 @@ defmodule Vault do
   A quick example of renewing a lease.
   ```
   vault = Vault.new(
-    http: Vault.HTTP.Tesla, 
-    host: "http://localhost", 
+    http: Vault.HTTP.Tesla,
+    host: "http://localhost",
     token: "token"
     token_expires_in: NaiveDateTime.utc_now()
   )
