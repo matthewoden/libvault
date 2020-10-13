@@ -2,7 +2,7 @@ defmodule Vault.HTTP.Adapter do
   @moduledoc """
   Adapter interface for making Vault HTTP.
 
-  `Vault` comes with a basic Tesla Adapter, providing support for `hackney`, 
+  `Vault` comes with a basic Tesla Adapter, providing support for `hackney`,
   `httpc`, and `ibrowse`
   """
 

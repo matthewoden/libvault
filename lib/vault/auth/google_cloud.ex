@@ -1,6 +1,6 @@
 defmodule Vault.Auth.GoogleCloud do
   @moduledoc """
-  Google Cloud Auth Adapter. 
+  Google Cloud Auth Adapter.
 
   [Vault Docs](https://www.vaultproject.io/api/auth/gcp/index.html)
   """

@@ -1,6 +1,6 @@
 defmodule Vault.Auth.Kubernetes do
   @moduledoc """
-  Kubernetes Auth Adapter. 
+  Kubernetes Auth Adapter.
 
   [Vault Docs](https://www.vaultproject.io/api/auth/kubernetes/index.html)
   """
@@ -15,7 +15,7 @@ defmodule Vault.Auth.Kubernetes do
   ```
   # Atom map
   {:ok, token, ttl} = Vault.Auth.Kubernetes.login(vault, %{role: "my-role", jwt: "my-jwt"})
-    
+
   # String Map
   {:ok, token, ttl} = Vault.Auth.Kubernetes.login(vault, %{"role" => "my-role", "jwt" => "my-jwt"})
 

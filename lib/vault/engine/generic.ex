@@ -1,14 +1,14 @@
 defmodule Vault.Engine.Generic do
   @moduledoc """
-  A generic Vault.Engine adapter. Most of the vault secret engines don't use a 
+  A generic Vault.Engine adapter. Most of the vault secret engines don't use a
   wildly different API, and can be handled with a single adapter.
 
   ## Request Details
-  By default, `read` runs a GET request, `write` does a POST, `list` does a GET 
-  with an appended `?list=true`, and `delete` runs a DELETE. The options below 
+  By default, `read` runs a GET request, `write` does a POST, `list` does a GET
+  with an appended `?list=true`, and `delete` runs a DELETE. The options below
   should give you additional flexibility.
 
-  ### Request Options: 
+  ### Request Options:
   - :method - one of :get, :put, :post, :options, :patch, :head
   - :full_response - if `true`, returns the full response body on success, rather than just the `data` key. Defaults to `false`,
   - :query_params - query params for the request. Defaults to `%{}` (no params)
@@ -18,7 +18,7 @@ defmodule Vault.Engine.Generic do
 
   Create a generic vault client:
 
-    {:ok, vault } = 
+    {:ok, vault } =
       Vault.new(
         host: System.get_env("VAULT_ADDR"),
         auth: Vault.Auth.Token,
@@ -46,10 +46,10 @@ defmodule Vault.Engine.Generic do
       })
 
     # read a role, and return the full response
-    {:ok, %{ "data" => data } } = 
+    {:ok, %{ "data" => data } } =
       Vault.read(vault, "ssh-client-signer/roles/test", full_response: true)
 
-  Options: 
+  Options:
   - :method - one of :get, :put, :post, :options, :patch, :head
   - :full_response - if `true`, returns the full response body on success, rather than just the `data` key. Defaults to `false`,
   - :params - query params for the request. Defaults to `%{}` (no params)
@@ -65,8 +65,8 @@ defmodule Vault.Engine.Generic do
   @type errors :: list()
 
   @doc """
-  Gets a value from vault. Defaults to a GET request against the current path. 
-  See `optionx` details above for full configuration.
+  Gets a value from vault. Defaults to a GET request against the current path.
+  See `option` details above for full configuration.
   """
   @impl true
   def read(vault, path, options \\ []) do
@@ -75,7 +75,7 @@ defmodule Vault.Engine.Generic do
   end
 
   @doc """
-  Puts a value in vault. Defaults to a POST request against the provided path.  
+  Puts a value in vault. Defaults to a POST request against the provided path.
   See `options` details above for full configuration.
   """
   @impl true
@@ -85,17 +85,17 @@ defmodule Vault.Engine.Generic do
   end
 
   @doc """
-  Lists secrets at a path. Defaults to a GET request against the provided path, 
-  with a query param of ?list=true.  
+  Lists secrets at a path. Defaults to a GET request against the provided path,
+  with a query param of ?list=true.
 
   See `options` details above for full configuration.
 
   ## Examples
 
   ```
-  {:ok, %{ 
-      "keys"=> ["foo", "foo/"] 
-    } 
+  {:ok, %{
+      "keys"=> ["foo", "foo/"]
+    }
   } = Vault.Engine.Generic.list(vault, "path/to/list/", [full_response: true])
   ```
   With the full Response:

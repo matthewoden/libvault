@@ -1,6 +1,6 @@
 defmodule Vault.Auth.JWT do
   @moduledoc """
-  JWT Auth Adapter. 
+  JWT Auth Adapter.
 
   [Vault Docs](https://www.vaultproject.io/api/auth/jwt/index.html)
   """
@@ -15,7 +15,7 @@ defmodule Vault.Auth.JWT do
   ```
   # Atom Map
   {:ok, token, ttl} = Vault.Auth.JWT.login(vault, %{role: "dev-role", jwt: "my-jwt"})
-    
+
   # String Map
   {:ok, token, ttl} = Vault.Auth.JWT.login(vault, %{"role" => "my-role", "jwt" => "my-jwt"})
 

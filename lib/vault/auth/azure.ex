@@ -1,6 +1,6 @@
 defmodule Vault.Auth.Azure do
   @moduledoc """
-  Azure Auth Adapter. 
+  Azure Auth Adapter.
 
   [Vault Docs](https://www.vaultproject.io/api/auth/azure/index.html)
   """

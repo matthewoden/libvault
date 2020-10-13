@@ -1,15 +1,15 @@
 defmodule Vault.Auth.Adapter do
   @moduledoc """
-  Adapter interface for authenticating with vault. 
+  Adapter interface for authenticating with vault.
 
   ## Writing your own adapter
   Auth adapters are pretty simple. You build a url, map the parameters, and grab
-  the response. Feel free to use the provided `Vault.HTTP` module to make http 
-  requests against your vault instance. 
+  the response. Feel free to use the provided `Vault.HTTP` module to make http
+  requests against your vault instance.
 
-  In most cases, you'll end up sending a POST to `auth/SOME_BACKEND/login`, 
-  and pass the parameters along as a body. Below, you'll find a starting template 
-  for your own adapter. If you're writing an official implementation, check the 
+  In most cases, you'll end up sending a POST to `auth/SOME_BACKEND/login`,
+  and pass the parameters along as a body. Below, you'll find a starting template
+  for your own adapter. If you're writing an official implementation, check the
   Docs link below for the spec.
 
   [Vault Auth Method Docs](https://www.vaultproject.io/api/auth/index.html)
@@ -47,7 +47,7 @@ defmodule Vault.Auth.Adapter do
       end
     end
 
-    def login(%Vault{http: http, host: host}, _params), 
+    def login(%Vault{http: http, host: host}, _params),
       do: {:error, ["Missing params! Username and password are required."]}
   end
 
