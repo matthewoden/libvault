@@ -15,7 +15,7 @@ defmodule Vault.Engine.KVV2 do
   @type options :: list()
 
   @doc """
-  Get a secret from vault. Optionally supply a version, otherwise gets latest 
+  Get a secret from vault. Optionally supply a version, otherwise gets latest
   value.
 
   ## Examples
@@ -28,7 +28,7 @@ defmodule Vault.Engine.KVV2 do
   ```
 
   Because of the nature of soft deletes,fetching soft-deleted secrets will return
-  an error. 
+  an error.
 
   ```
   {:error, ["Key not found"]} = Vault.Engine.KVV2.read(vault, "soft/deleted/secret", [version: 1])
@@ -54,14 +54,14 @@ defmodule Vault.Engine.KVV2 do
       "request_id" => "e289ff31-609f-44fa-7161-55c63fda3d43",
       "warnings" => nil,
       "wrap_info" => nil
-    } 
+    }
   } = Vault.Engine.KVV2.read(vault, "soft/deleted/secret", [version: 1, full_response: true])
 
   ```
 
   Options:
   - `version: integer` - the version you want to return.
-  - `full_response: boolean` - get the whole reponse back on success, not just the data field
+  - `full_response: boolean` - get the whole response back on success, not just the data field
   """
   @impl true
   @spec read(vault, path, options) :: {:ok, value} | {:error, errors}
@@ -85,7 +85,7 @@ defmodule Vault.Engine.KVV2 do
   end
 
   @doc """
-  Put a secret in vault, on a given path. 
+  Put a secret in vault, on a given path.
 
   ## Examples
 
@@ -94,7 +94,7 @@ defmodule Vault.Engine.KVV2 do
   {:ok, %{}} = Vault.Engine.Generic.write(vault, "path/to/write", %{ foo: "bar" })
   ```
 
-  Check and set  - see [Vault Docs](https://www.vaultproject.io/api/secret/kv/kv-v2.html#create-update-secret) 
+  Check and set  - see [Vault Docs](https://www.vaultproject.io/api/secret/kv/kv-v2.html#create-update-secret)
   for details
 
   ```
@@ -123,7 +123,7 @@ defmodule Vault.Engine.KVV2 do
 
   ### Options
   - `cas: integer` set a check-and-set value
-  - `full_response: boolean` - get the whole reponse back on success, not just the data field
+  - `full_response: boolean` - get the whole response back on success, not just the data field
   """
   @impl true
   @spec write(vault, path, value, options) :: {:ok, map()} | {:error, errors}
@@ -137,15 +137,15 @@ defmodule Vault.Engine.KVV2 do
   end
 
   @doc """
-  This endpoint returns a list of key names at the specified location. Folders are 
+  This endpoint returns a list of key names at the specified location. Folders are
   suffixed with /. The input must be a folder; list on a file will not return a value.
 
   ## Examples
 
   ```
-  {:ok, %{ 
-      "keys"=> ["foo", "foo/"] 
-    } 
+  {:ok, %{
+      "keys"=> ["foo", "foo/"]
+    }
   } = Vault.Engine.KVV2.List(vault, "path/to/list/", [full_response: true])
   ```
   With the full Response:
@@ -166,7 +166,7 @@ defmodule Vault.Engine.KVV2 do
   end
 
   @doc """
-  Soft or Hard Delete a versioned secret. Requires a list of versions to be removed. This request 
+  Soft or Hard Delete a versioned secret. Requires a list of versions to be removed. This request
   produces an empty body, so an empty map is returned.
 
   ## Examples
@@ -181,7 +181,7 @@ defmodule Vault.Engine.KVV2 do
         "destroyed" => false,
         "version" => 5
       }
-    } 
+    }
   } = Vault.Engine.KVV2.Delete(vault, "path/to/delete", versions: [5], full_response: true)
   ```
 
@@ -194,7 +194,7 @@ defmodule Vault.Engine.KVV2 do
         "destroyed" => true,
         "version" => 5
       }
-    } 
+    }
   } = Vault.Engine.KVV2.Delete(vault, "path/to/delete", versions: [5], destroy: true, full_response: true)
 
   """

@@ -1,10 +1,13 @@
 defmodule Vault.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/matthewoden/libvault"
+  @version "0.2.3"
+
   def project do
     [
       app: :libvault,
-      version: "0.2.2",
+      version: @version,
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
@@ -15,18 +18,15 @@ defmodule Vault.MixProject do
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
       extra_applications: [:logger]
     ]
   end
 
-  # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       # http clients
@@ -39,6 +39,7 @@ defmodule Vault.MixProject do
       # json parsers
       {:jason, ">= 1.0.0", only: [:dev, :test]},
       {:poison, "~> 3.0", only: [:dev, :test]},
+
       # testing
       {:bypass, "~> 1.0", only: :test},
       {:plug_cowboy, "~> 1.0", only: :test},
@@ -50,6 +51,9 @@ defmodule Vault.MixProject do
 
   defp docs do
     [
+      main: "readme",
+      source_ref: "v#{@version}",
+      source_url: @source_url,
       formatter_opts: [gfm: true],
       extras: ["README.md"]
     ]
@@ -68,7 +72,7 @@ defmodule Vault.MixProject do
       files: ["lib", "mix.exs", "README.md", "LICENSE.md"],
       maintainers: ["Matthew Oden Potter"],
       licenses: ["MIT"],
-      links: %{GitHub: "https://github.com/matthewoden/libvault"}
+      links: %{GitHub: @source_url}
     ]
   end
 end

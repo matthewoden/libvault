@@ -22,7 +22,7 @@ defmodule Vault.Auth.Generic do
   @behaviour Vault.Auth.Adapter
 
   @doc """
-  Authenticate with a custom auth method. Provide options for the request, and how 
+  Authenticate with a custom auth method. Provide options for the request, and how
   to parse the response.
 
   ## Examples
@@ -33,16 +33,16 @@ defmodule Vault.Auth.Generic do
   - `body`- any params needed to login. Defaults to `%{}`
 
   `response` defines parameters for parsing the response.
-  - `token_path` - a list of properties that describe the JSON path to a token. Defaults to `["auth", "client_token"]` 
+  - `token_path` - a list of properties that describe the JSON path to a token. Defaults to `["auth", "client_token"]`
   - `ttl_path` - a list of properties that describe the JSON path to the ttl, or lease duration. Defaults to ["auth", "lease_duration"]
 
 
   The following would provide a minimal adapter for the JWT backend:
   ```
-  {:ok, token, ttl} = Vault.Auth.Generic.login(vault, %{ 
+  {:ok, token, ttl} = Vault.Auth.Generic.login(vault, %{
     request: %{
-      path: "/jwt/login", 
-      body: %{role: "my-role", jwt: "my-jwt" }, 
+      path: "/jwt/login",
+      body: %{role: "my-role", jwt: "my-jwt" },
     }
   })
   ```
@@ -50,17 +50,17 @@ defmodule Vault.Auth.Generic do
   Here's the above example as part of the full Vault client flow. On success,
   it returns an authenticated vault client.
   ```
-  vault = 
+  vault =
     Vault.new([
       auth: Vault.Auth.Generic,
       http: Vault.HTTP.Tesla,
       engine: Vault.KVV2
     ])
 
-  {:ok, vault} = Vault.auth(vault, %{ 
+  {:ok, vault} = Vault.auth(vault, %{
     request: %{
-      path: "/jwt/login", 
-      body: %{role: "my-role", jwt: "my-jwt" }, 
+      path: "/jwt/login",
+      body: %{role: "my-role", jwt: "my-jwt" },
     }
   })
   ```
@@ -68,18 +68,18 @@ defmodule Vault.Auth.Generic do
   Here's a more explicit example, with every option configured.
   ```
 
-  vault = 
+  vault =
     Vault.new([
       auth: Vault.Auth.Generic,
       http: Vault.HTTP.Tesla,
       engine: Vault.KVV2
     ])
 
-  {:ok, vault} = Vault.auth(vault, %{ 
+  {:ok, vault} = Vault.auth(vault, %{
     request:
-      path: "/jwt/login", 
+      path: "/jwt/login",
       method: :post,
-      body: %{role: "my-role", jwt: "my-jwt" }, 
+      body: %{role: "my-role", jwt: "my-jwt" },
     response: %{
       token: ["auth", "client_token"],
       ttl: ["auth", "lease_duration"]

@@ -1,7 +1,7 @@
 defmodule Vault.Auth.Token do
   @moduledoc """
   Token Auth Adapter. Checks a provided token for validity, and saves if valid. Useful
-  for local dev, or writing a CLI that uses the `.vault-token` file in the home 
+  for local dev, or writing a CLI that uses the `.vault-token` file in the home
   directory.
 
   [Vault Docs](https://www.vaultproject.io/api/auth/token/index.html#lookup-a-token-self-)
