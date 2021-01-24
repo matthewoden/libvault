@@ -62,7 +62,7 @@ defmodule Vault do
 
       vault = Vault.new(%{
         http: Vault.HTTP.Tesla,
-        host: myvault.instance.com,
+        host: "myvault.instance.com",
         auth: Vault.Auth.JWT,
         auth_path: 'jwt',
         engine: Vault.Engine.Generic,
