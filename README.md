@@ -21,7 +21,7 @@ HTML docs can be found at
 ## API Preview
 
 ```elixir
-{:ok, vault } =
+{:ok, vault} =
   Vault.new([
     engine: Vault.Engine.KVV2,
     auth: Vault.Auth.UserPass
