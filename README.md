@@ -21,11 +21,11 @@ HTML docs can be found at
 ## API Preview
 
 ```elixir
-{:ok, vault } =
-  Vault.new([
+{:ok, vault} =
+  Vault.new(
     engine: Vault.Engine.KVV2,
     auth: Vault.Auth.UserPass
-  ])
+  )
   |> Vault.auth(%{username: "username", password: "password"})
 
 {:ok, db_pass} = Vault.read(vault, "secret/path/to/password")
