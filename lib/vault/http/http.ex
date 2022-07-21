@@ -83,5 +83,6 @@ defmodule Vault.HTTP do
   defp encode(json, body), do: json.encode(body)
 
   defp decode(_json, ""), do: {:ok, nil}
+  defp decode(_json, nil), do: {:ok, nil}
   defp decode(json, body), do: json.decode(body)
 end
