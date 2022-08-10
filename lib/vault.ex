@@ -103,7 +103,7 @@ defmodule Vault do
       Auth adapter.
 
   """
-
+  @spec new() :: t
   @spec new(options) :: t
   def new(params \\ %{}) when is_list(params) or is_map(params) do
     params = Map.merge(%{host: System.get_env("VAULT_ADDR")}, Map.new(params))
@@ -230,6 +230,7 @@ defmodule Vault do
         Vault.set_credentials(vault, %{username: "whoops"})
 
   """
+  @spec auth(t) :: {:ok, t} | {:error, [term]}
   @spec auth(t, map) :: {:ok, t} | {:error, [term]}
   def auth(vault, params \\ %{})
   def auth(%__MODULE__{auth: _, http: nil}, _params), do: {:error, ["http client not set"]}
@@ -306,7 +307,8 @@ defmodule Vault do
       {:error, ["Unauthorized"]} = Vault.read(vault,"secret/bad/path")
 
   """
-  @spec read(t, String.t(), list()) :: {:ok, map} | {:error, term}
+  @spec read(t, String.t()) :: {:ok, map} | {:error, term}
+  @spec read(t, String.t(), keyword) :: {:ok, map} | {:error, term}
   def read(vault, path, options \\ [])
 
   def read(%__MODULE__{engine: _, http: nil}, _path, _options),
@@ -334,7 +336,8 @@ defmodule Vault do
       {:error, ["Unauthorized"]} = Vault.write(vault,"secret/bad/path", %{ secret: "value"})
 
   """
-  @spec write(t, String.t(), term, list()) :: {:ok, map} | {:error, term}
+  @spec write(t, String.t(), term) :: {:ok, map} | {:error, term}
+  @spec write(t, String.t(), term, keyword) :: {:ok, map} | {:error, term}
   def write(vault, path, value, options \\ [])
 
   def write(%__MODULE__{engine: _, http: nil}, _path, _value, _options),
@@ -368,7 +371,8 @@ defmodule Vault do
       {:error, ["Unauthorized"]} = Vault.list(vault,"secret/bad/path/")
 
   """
-  @spec list(t, String.t(), list()) :: {:ok, map} | {:error, term}
+  @spec list(t, String.t()) :: {:ok, map} | {:error, term}
+  @spec list(t, String.t(), keyword) :: {:ok, map} | {:error, term}
   def list(vault, path, options \\ [])
 
   def list(%__MODULE__{engine: _, http: nil}, _path, _options),
@@ -393,7 +397,8 @@ defmodule Vault do
       {:error, ["Key not found"]} = Vault.list(vault,"secret/bad/path/")
 
   """
-  @spec delete(t, String.t(), list()) :: {:ok, map} | {:error, term}
+  @spec delete(t, String.t()) :: {:ok, map} | {:error, term}
+  @spec delete(t, String.t(), keyword) :: {:ok, map} | {:error, term}
   def delete(vault, path, options \\ [])
 
   def delete(%__MODULE__{engine: _, http: nil}, _path, _options),
@@ -466,7 +471,8 @@ defmodule Vault do
 
   @methods [:get, :put, :post, :patch, :head, :delete]
 
-  @spec request(t, method, String.t(), list) :: {:ok, term} | {:error, list()}
+  @spec request(t, method, String.t()) :: {:ok, term} | {:error, list()}
+  @spec request(t, method, String.t(), keyword) :: {:ok, term} | {:error, list()}
   def request(vault, method, path, options \\ [])
 
   def request(%__MODULE__{http: nil}, _method, _path, _options),
