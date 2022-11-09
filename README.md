@@ -63,7 +63,7 @@ See `Vault.JSON.Adapter` for the full behaviour interface.
 Adapters have been provided for the following auth backends:
 
 - [AppRole](https://www.vaultproject.io/api/auth/approle/index.html) with `Vault.Auth.Approle`
-- [Azure](https://www.vaultproject.io/api/auth/approle/index.html) with `Vault.Auth.Azure`
+- [Azure](https://www.vaultproject.io/api/auth/azure/index.html) with `Vault.Auth.Azure`
 - [GitHub](https://www.vaultproject.io/api/auth/github/index.html) with `Vault.Auth.Github`
 - [GoogleCloud](https://www.vaultproject.io/api/auth/gcp/index.html) with with `Vault.Auth.GoogleCloud`
 - [JWT](https://www.vaultproject.io/api/auth/jwt/index.html) with `Vault.Auth.JWT`
