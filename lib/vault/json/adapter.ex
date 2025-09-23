@@ -4,7 +4,7 @@ defmodule Vault.JSON.Adapter do
 
   Recommended JSON adapters:
   - `Jason`
-  - `Poison`
+  - `JSON`
   """
   @type options :: list | map
 

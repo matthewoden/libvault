@@ -45,8 +45,6 @@ if Code.ensure_loaded?(Tesla) do
       ])
 
     """
-    use Tesla
-
     @behaviour Vault.HTTP.Adapter
 
     @impl true

@@ -8,7 +8,7 @@ defmodule Vault do
   @http if Code.ensure_loaded?(Tesla), do: Vault.HTTP.Tesla, else: nil
   @json if Code.ensure_loaded?(Jason),
           do: Jason,
-          else: if(Code.ensure_loaded?(Poison), do: Poison, else: nil)
+          else: if(Code.ensure_loaded?(JSON), do: JSON, else: nil)
 
   defstruct http: @http,
             json: @json,

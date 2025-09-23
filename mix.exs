@@ -2,13 +2,13 @@ defmodule Vault.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/matthewoden/libvault"
-  @version "0.2.4"
+  @version "1.0.0"
 
   def project do
     [
       app: :libvault,
       version: @version,
-      elixir: "~> 1.5",
+      elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
       start_permanent: Mix.env() == :prod,
@@ -31,21 +31,20 @@ defmodule Vault.MixProject do
     [
       # http clients
       {:ibrowse, "~> 4.4.0", optional: true},
-      {:hackney, "~> 1.6", optional: true},
-      {:castore, "~> 0.1", optional: true},
-      {:mint, "~> 1.0", optional: true},
-      {:tesla, "~> 1.3", optional: true},
+      {:hackney, "~> 1.24.0", optional: true},
+      {:castore, "~> 1.0", optional: true},
+      {:mint, "~> 1.7", optional: true},
+      {:tesla, "~> 1.14", optional: true},
 
       # json parsers
-      {:jason, ">= 1.0.0", only: [:dev, :test]},
-      {:poison, "~> 3.0", only: [:dev, :test]},
+      {:jason, "~> 1.4.0", only: [:dev, :test]},
 
       # testing
-      {:bypass, "~> 1.0", only: :test},
-      {:plug_cowboy, "~> 1.0", only: :test},
+      {:bypass, "~> 2.0", only: :test},
+      {:plug_cowboy, "~> 2.0", only: :test},
 
       # docs
-      {:ex_doc, "~> 0.19", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.22", only: :dev, runtime: false}
     ]
   end
 

@@ -54,7 +54,7 @@ Be sure to add applications and dependencies to your mix file as needed.
 Most JSON libraries provide the same methods, so no default adapter is needed.
 You can use `Jason`, `JSX`, `Poison`, or whatever encoder you want.
 
-Defaults to `Jason` or `Poison` if present.
+Defaults to `Jason` if present.
 
 See `Vault.JSON.Adapter` for the full behaviour interface.
 
