@@ -96,13 +96,11 @@ defmodule Vault.Auth.Generic do
   def login(vault, params)
 
   def login(%Vault{} = vault, %{request: request} = params) do
-    request = Map.merge(%{method: :post, body: %{}}, request)
+    request = Map.merge(%{method: :post, body: %{}, headers: []}, request)
 
     response = Map.merge(@default_response, Map.get(params, :response, %{}))
 
-    headers = [
-      {"Content-Type", "application/json"}
-    ]
+    headers = [{"Content-Type", "application/json"}] ++ request.headers
 
     url = "auth/#{request.path}"
 
