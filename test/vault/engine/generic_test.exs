@@ -26,7 +26,8 @@ defmodule Vault.Engine.GenericTest do
   end
 
   test "Generic Engine reads to the cubbyhole are denied when not authorized" do
-    assert {:error, ["permission denied"]} == Vault.read(client("bad_Creds"), "cubbyhole/world")
+    assert {:error, ["2 errors occurred:\n\t* permission denied\n\t* invalid token\n\n"]} ==
+             Vault.read(client("bad_Creds"), "cubbyhole/world")
   end
 
   test "Generic Engine can write to the cubbyhole" do
@@ -35,7 +36,7 @@ defmodule Vault.Engine.GenericTest do
   end
 
   test "Generic Engine writes to the cubbyhole are denied when not authorized" do
-    assert {:error, ["permission denied"]} ==
+    assert {:error, ["2 errors occurred:\n\t* permission denied\n\t* invalid token\n\n"]} ==
              Vault.write(client("bad_Creds"), "cubbyhole/world", %{"baz" => "biz"})
   end
 
@@ -51,21 +52,23 @@ defmodule Vault.Engine.GenericTest do
   end
 
   test "Generic Engine can read/write to/from ssh" do
-    key = File.read!("./test/vault/engine/certs/test")
-    {:ok, _} = Vault.write(client(), "ssh-client-signer/keys/test", %{key: key})
+    {:ok, _} =
+      Vault.write(client(), "ssh-client-signer/config/ca", %{
+        generate_signing_key: true
+      })
 
     {:ok, _} =
       Vault.write(client(), "ssh-client-signer/roles/test", %{
-        key: "test",
-        key_type: "dynamic",
+        key_type: "ca",
         default_user: "tester",
-        admin_user: "admin_tester"
+        allowed_users: "tester",
+        allow_host_certificates: true
       })
 
     {:ok, %{"data" => data}} =
       Vault.read(client(), "ssh-client-signer/roles/test", full_response: true)
 
-    assert data["admin_user"] == "admin_tester"
-    assert data["key_type"] == "dynamic"
+    assert data["key_type"] == "ca"
+    assert data["default_user"] == "tester"
   end
 end

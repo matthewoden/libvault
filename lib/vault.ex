@@ -3,8 +3,6 @@ defmodule Vault do
   The main module for configuring and interacting with HashiCorp's Vault.
   """
 
-  require Logger
-
   @http if Code.ensure_loaded?(Tesla), do: Vault.HTTP.Tesla, else: nil
   @json if Code.ensure_loaded?(Jason),
           do: Jason,

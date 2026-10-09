@@ -30,7 +30,8 @@ defmodule Vault.Engine.KVV2Test do
   end
 
   test "kvv2 read returns an error if token is invalid" do
-    assert {:error, ["permission denied"]} == Vault.read(client("bad creds"), "secret/hello")
+    assert {:error, ["2 errors occurred:\n\t* permission denied\n\t* invalid token\n\n"]} ==
+             Vault.read(client("bad creds"), "secret/hello")
   end
 
   test "kvv2 write posts a secret when authorized" do
@@ -57,7 +58,7 @@ defmodule Vault.Engine.KVV2Test do
   end
 
   test "kvv2 write returns an error if token is invalid" do
-    assert {:error, ["permission denied"]} ==
+    assert {:error, ["2 errors occurred:\n\t* permission denied\n\t* invalid token\n\n"]} ==
              Vault.write(client("bad_creds"), "secret/write", %{"foo" => "baz"})
   end
 

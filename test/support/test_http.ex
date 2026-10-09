@@ -41,7 +41,7 @@ defmodule Vault.Http.Test do
   def request(
         :post,
         "http://localhost/v1/auth/ldap/" <> _rest,
-        ~s<{"password":"error"}>,
+        _body,
         _headers,
         _http_options
       ) do
@@ -51,7 +51,7 @@ defmodule Vault.Http.Test do
   def request(
         :post,
         "http://localhost/v1/auth/userpass/" <> _rest,
-        ~s<{"password":"error"}>,
+        _body,
         _headers,
         _http_options
       ) do
@@ -61,7 +61,7 @@ defmodule Vault.Http.Test do
   def request(
         :post,
         "http://localhost/v1/auth/azure/login" <> _rest,
-        ~s<{"jwt":"error","role":"error"}>,
+        _body,
         _headers,
         _http_options
       ) do
@@ -71,7 +71,7 @@ defmodule Vault.Http.Test do
   def request(
         :post,
         "http://localhost/v1/auth/gcp/login" <> _rest,
-        ~s<{"jwt":"error","role":"error"}>,
+        _body,
         _headers,
         _http_options
       ) do
@@ -81,7 +81,7 @@ defmodule Vault.Http.Test do
   def request(
         :post,
         "http://localhost/v1/auth/jwt/login" <> _rest,
-        ~s<{"jwt":"error","role":"error"}>,
+        _body,
         _headers,
         _http_options
       ) do
@@ -91,7 +91,7 @@ defmodule Vault.Http.Test do
   def request(
         :post,
         "http://localhost/v1/auth/kubernetes/login" <> _rest,
-        ~s<{"jwt":"error","role":"error"}>,
+        _body,
         _headers,
         _http_options
       ) do
